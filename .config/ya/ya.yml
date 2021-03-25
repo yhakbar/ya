@@ -1,0 +1,12 @@
+---
+name: ya
+
+config:
+  build:
+    plugin: docker
+    config:
+      image: ya-builder:latest
+      dockerfile: .config/docker/Dockerfile
+      workdir: /app
+      volumes:
+        - $PWD:/app
