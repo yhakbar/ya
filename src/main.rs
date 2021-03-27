@@ -1,5 +1,6 @@
 mod config;
 mod yml;
+use std::path::PathBuf;
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
@@ -17,7 +18,10 @@ enum Ya {
         config: String,
     },
     #[structopt(name = "yml", about = "Prints some yml")]
-    YML {},
+    YML {
+        #[structopt(parse(from_os_str), help = "File to read")]
+        file: PathBuf,
+    },
 }
 
 fn init(config: &str) -> std::io::Result<()> {
@@ -30,8 +34,12 @@ fn main() -> std::io::Result<()> {
         Ya::Init { config } => {
             init(&config)?;
         }
-        Ya::YML {} => {
-            yml::print_some_yml();
+        Ya::YML { file } => {
+            let file_str = file.to_str();
+            match file_str {
+                None => panic!("path is not a valid UTF-8 sequence"),
+                Some(s) => yml::load_yml_configurations(&s),
+            }
         }
     }
 
