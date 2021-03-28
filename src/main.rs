@@ -13,16 +13,22 @@ enum Ya {
         #[structopt(
             short = "c",
             long = "config",
-            help = "Nest configuration in .config file",
+            help = "Location of configuration file",
             required = false,
             default_value = ".config/ya/ya.yml"
         )]
         config: String,
     },
-    #[structopt(name = "yml", about = "Prints some yml")]
-    YML {
-        #[structopt(parse(from_os_str), help = "File to read")]
-        file: PathBuf,
+    #[structopt(name = "build", about = "Runs a build according to ya configuration")]
+    Build {
+        #[structopt(
+            short = "c",
+            long = "config",
+            help = "Location of configuration file",
+            required = false,
+            default_value = ".config/ya/ya.yml"
+        )]
+        config: PathBuf,
     },
 }
 
@@ -37,8 +43,8 @@ fn main() -> std::io::Result<()> {
         Ya::Init { config } => {
             init(&config)?;
         }
-        Ya::YML { file } => {
-            let file_str = file.to_str();
+        Ya::Build { config } => {
+            let file_str = config.to_str();
             match file_str {
                 None => panic!("path is not a valid UTF-8 sequence"),
                 Some(s) => {
