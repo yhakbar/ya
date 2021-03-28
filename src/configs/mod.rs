@@ -29,6 +29,7 @@ impl DockerBuildConfig {
             match key.as_str().unwrap() {
                 "image" => config.image = value.as_str().unwrap().to_string(),
                 "dockerfile" => config.dockerfile = value.as_str().unwrap().to_string(),
+                "docker_context" => config.docker_context = value.as_str().unwrap().to_string(),
                 "workdir" => config.workdir = value.as_str().unwrap().to_string(),
                 "volumes" => {
                     config.volumes = vec![];
@@ -51,11 +52,12 @@ impl DockerBuildConfig {
             .arg(&self.dockerfile)
             .arg(&self.docker_context)
             .output()
-            .expect("failed to execute process");
+            .expect("failed to build image");
         println!("{}", String::from_utf8_lossy(&build_output.stdout));
         println!("{}", String::from_utf8_lossy(&build_output.stderr));
     }
 
+    // TODO Not bothering with proper volume mount bindings right now, but I should.
     fn run_docker_container(&self) {
         let pwd = env::current_dir().unwrap().to_str().unwrap().to_string();
         let volume_mount = str::replace("$PWD:/app", "$PWD", &pwd);
@@ -68,7 +70,7 @@ impl DockerBuildConfig {
             .arg(&self.workdir)
             .arg(&self.image)
             .output()
-            .expect("failed to execute process");
+            .expect("failed to run container");
         println!("{}", String::from_utf8_lossy(&build_output.stdout));
         println!("{}", String::from_utf8_lossy(&build_output.stderr));
     }
