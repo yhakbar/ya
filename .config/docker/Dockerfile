@@ -1,9 +1,15 @@
-FROM rust:latest
+FROM rust:alpine
 
-RUN rustup target add aarch64-apple-darwin
+RUN apk add --no-cache musl-dev build-base
 
-CMD cargo build --release \
-    --target aarch64-apple-darwin \
-    --target aarch64-unknown-linux-gnu \
-    --target x86_64-apple-darwin \
-    --target x86_64-unknown-linux-gnu
+RUN rustup target add aarch64-apple-darwin && \
+    rustup target add aarch64-unknown-linux-gnu && \
+    rustup target add x86_64-apple-darwin && \
+    rustup target add x86_64-unknown-linux-gnu && \
+    rustup target add x86_64-unknown-linux-musl
+
+CMD cargo build --release --target aarch64-apple-darwin && \
+    cargo build --release --target aarch64-unknown-linux-gnu && \
+    cargo build --release --target x86_64-apple-darwin && \
+    cargo build --release --target x86_64-unknown-linux-gnu && \
+    cargo build --release --target x86_64-unknown-linux-musl

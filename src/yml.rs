@@ -1,19 +1,18 @@
 extern crate yaml_rust;
 use std::fs::File;
 use std::io::prelude::*;
-use yaml_rust::{YamlEmitter, YamlLoader};
+use yaml_rust::{Yaml, YamlEmitter, YamlLoader};
 
-pub fn print_yml(doc: &yaml_rust::Yaml) {
+pub fn print_yml(doc: &Yaml) {
     // Dump the YAML object
     let mut out_str = String::new();
     {
         let mut emitter = YamlEmitter::new(&mut out_str);
         emitter.dump(doc).unwrap(); // dump the YAML object to a String
     }
-    println!("{}", out_str);
 }
 
-pub fn load_yml_configurations(file: &str) {
+pub fn get_yml_from_file(file: &str) -> Yaml {
     let mut file = File::open(file).expect("Unable to open file");
     let mut contents = String::new();
 
@@ -24,5 +23,8 @@ pub fn load_yml_configurations(file: &str) {
 
     // Multi document support, doc is a yaml::Yaml
     let doc = &docs[0];
-    print_yml(doc)
+
+    print_yml(&doc);
+
+    return doc.clone();
 }
