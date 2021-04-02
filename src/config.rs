@@ -1,13 +1,12 @@
 extern crate yaml_rust;
-use yaml_rust::yaml::Hash;
+use yaml_rust::yaml::{Hash, Yaml};
 
-use crate::configs::DockerBuildConfig;
 use crate::yml::get_yml_from_file;
 
 #[derive(Debug)]
 pub struct Config {
-    name: String,
-    config: Hash,
+    pub name: String,
+    pub config: Hash,
     // Special configs
     // docker_build_config: DockerBuildConfig,
 }
@@ -17,26 +16,26 @@ pub fn new_from_yml(doc: &yaml_rust::Yaml) -> Config {
         name: String::from(""),
         config: Hash::new(),
     };
+    let doc_hash = doc.as_hash().unwrap();
 
-    // TODO - Optimize
-    if !doc["name"].is_badvalue() {
-        config.name = doc["name"].as_str().unwrap().to_string();
-    }
-    if !doc["config"].is_badvalue() {
-        let yml_config = &doc["config"];
-
-        config.config = yml_config.as_hash().unwrap().clone();
-
-        if !yml_config["build"].is_badvalue() {
-            let build = &yml_config["build"];
-
-            if !build["plugin"].is_badvalue() && build["plugin"].as_str().unwrap() == "docker" {
-                let docker_build_config =
-                    DockerBuildConfig::new(&build["config"].as_hash().unwrap());
-                docker_build_config.build();
-            }
+    match doc_hash.get(&Yaml::String("name".to_string())) {
+        Some(name) => {
+            config.name = name.as_str().unwrap().to_string();
+        }
+        None => {
+            panic!("Name not found in file config");
         }
     }
+
+    match doc_hash.get(&Yaml::String("config".to_string())) {
+        Some(ya_config) => {
+            config.config = ya_config.as_hash().unwrap().clone();
+        }
+        None => {
+            panic!("Config not found in file config");
+        }
+    }
+
     config
 }
 
