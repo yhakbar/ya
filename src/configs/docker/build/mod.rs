@@ -1,12 +1,10 @@
-use log::warn;
 use std::env;
 
-extern crate yaml_rust;
-use yaml_rust::yaml::Hash;
+use serde_derive::{Serialize, Deserialize};
 
 use std::process::Command;
 
-#[derive(Debug, Default)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct DockerBuildConfig {
     image: String,
     dockerfile: String,
@@ -16,33 +14,6 @@ pub struct DockerBuildConfig {
 }
 
 impl DockerBuildConfig {
-    pub fn new(docker_build_config: &Hash) -> DockerBuildConfig {
-        let mut config = DockerBuildConfig {
-            image: String::from("ya-builder"),
-            dockerfile: String::from("Dockerfile"),
-            docker_context: String::from("."),
-            workdir: String::from("/app"),
-            volumes: vec![],
-        };
-
-        for (key, value) in docker_build_config.iter() {
-            match key.as_str().unwrap() {
-                "image" => config.image = value.as_str().unwrap().to_string(),
-                "dockerfile" => config.dockerfile = value.as_str().unwrap().to_string(),
-                "docker_context" => config.docker_context = value.as_str().unwrap().to_string(),
-                "workdir" => config.workdir = value.as_str().unwrap().to_string(),
-                "volumes" => {
-                    config.volumes = vec![];
-                    for volume in value.as_vec().unwrap() {
-                        config.volumes.push(volume.as_str().unwrap().to_string());
-                    }
-                }
-                _ => warn!("Unsupported key {:?}", key),
-            }
-        }
-        config
-    }
-
     fn build_docker_image(&self) {
         let build_output = Command::new("docker")
             .arg("build")
