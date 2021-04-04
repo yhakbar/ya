@@ -1,5 +1,6 @@
 pub mod run;
 pub mod build;
+pub mod shell;
 
 use std::process::{Command, Stdio};
 use std::io::{BufRead, BufReader};
@@ -11,6 +12,10 @@ trait Shell {
 
 trait RunShellCommand {
     fn run_shell_command(&self);
+}
+
+trait StartInteractiveShell {
+    fn start_interactive_shell(&self);
 }
 
 impl<T> RunShellCommand for T where T: Shell {

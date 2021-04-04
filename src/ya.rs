@@ -4,6 +4,7 @@ use std::fs::File;
 use std::io::BufReader;
 
 use crate::build::BuildConfig;
+use crate::shell::ShellConfig;
 use crate::run::RunConfig;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -16,6 +17,7 @@ pub struct YaFile {
 pub struct YaConfig {
     pub build: Option<BuildConfig>,
     pub run: Option<RunConfig>,
+    pub shell: Option<ShellConfig>,
 }
 
 pub fn parse_ya_from_file(file: &str) -> Result<YaFile, Box<dyn Error>> {

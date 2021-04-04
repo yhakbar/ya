@@ -3,6 +3,15 @@ name: ya
 
 config:
   build:
+    plugin: shell
+    config:
+      command: |
+        docker build -t ya-builder:latest -f .config/docker/Dockerfile .config/docker
+        docker run --rm -v $PWD:/app -w /app ya-builder
+    #
+    # Other Examples
+    #
+    # shell: python
     # plugin: docker
     # config:
     #   image: ya-builder:latest
@@ -11,15 +20,21 @@ config:
     #   workdir: /app
     #   volumes:
     #     - $PWD:/app
-
-    plugin: shell
-    config:
-      command: |
-        docker build -t ya-builder:latest -f .config/docker/Dockerfile .config/docker
-        docker run --rm -v $PWD:/app -w /app ya-builder
+    #
 
   run:
     plugin: shell
     config:
       command: |
-        echo "hello"
+        echo "Running away!"
+
+  shell:
+    plugin: shell
+    config:
+      shell: docker
+      command: run -it --rm alpine
+    #
+    # Other Examples
+    #
+    # shell: python
+    #
