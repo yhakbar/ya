@@ -3,7 +3,7 @@ use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
 
-use crate::configs::docker::build::DockerBuildConfig;
+use crate::build::BuildConfig;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct YaFile {
@@ -14,18 +14,6 @@ pub struct YaFile {
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct YaConfig {
     pub build: Option<BuildConfig>,
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-pub struct BuildConfig {
-    pub plugin: String,
-    pub config: BuildConfigs,
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum BuildConfigs {
-    DockerBuildConfig(DockerBuildConfig),
 }
 
 pub fn parse_ya_from_file(file: &str) -> Result<YaFile, Box<dyn Error>> {

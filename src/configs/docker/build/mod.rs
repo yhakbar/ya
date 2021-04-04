@@ -6,22 +6,25 @@ use std::process::Command;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct DockerBuildConfig {
-    image: String,
-    dockerfile: String,
-    docker_context: String,
-    workdir: String,
-    volumes: Vec<String>,
+    image: Option<String>,
+    dockerfile: Option<String>,
+    docker_context: Option<String>,
+    workdir: Option<String>,
+    volumes: Option<Vec<String>>,
 }
 
 impl DockerBuildConfig {
     fn build_docker_image(&self) {
+        let image = &self.image.as_ref().expect("image must be defined to build image");
+        let dockerfile = &self.dockerfile.as_ref().expect("dockerfile must be defined to build image");
+        let docker_context = &self.docker_context.as_ref().expect("docker_context must be defined to build image");
         let build_output = Command::new("docker")
             .arg("build")
             .arg("-t")
-            .arg(&self.image)
+            .arg(image)
             .arg("-f")
-            .arg(&self.dockerfile)
-            .arg(&self.docker_context)
+            .arg(dockerfile)
+            .arg(docker_context)
             .output()
             .expect("failed to build image");
         println!("{}", String::from_utf8_lossy(&build_output.stdout));
@@ -32,14 +35,16 @@ impl DockerBuildConfig {
     fn run_docker_container(&self) {
         let pwd = env::current_dir().unwrap().to_str().unwrap().to_string();
         let volume_mount = str::replace("$PWD:/app", "$PWD", &pwd);
+        let workdir = &self.workdir.as_ref().expect("workdir must be defined to run container");
+        let image = &self.image.as_ref().expect("image must be defined to run container");
         let build_output = Command::new("docker")
             .arg("run")
             .arg("--rm")
             .arg("-v")
-            .arg(volume_mount)
+            .arg(&volume_mount)
             .arg("-w")
-            .arg(&self.workdir)
-            .arg(&self.image)
+            .arg(workdir)
+            .arg(image)
             .output()
             .expect("failed to run container");
         println!("{}", String::from_utf8_lossy(&build_output.stdout));
