@@ -11,3 +11,8 @@ config:
       workdir: /app
       volumes:
         - $PWD:/app
+  run:
+    plugin: shell
+    config:
+      command: |
+        echo "hello"

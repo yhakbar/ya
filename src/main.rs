@@ -6,10 +6,12 @@ mod fs;
 mod ya;
 mod init;
 mod build;
+mod run;
 
 use crate::init::handle_init;
 use crate::config::handle_config;
 use crate::build::handle_build;
+use crate::run::handle_run;
 
 use std::path::PathBuf;
 use structopt::StructOpt;
@@ -50,6 +52,17 @@ enum Ya {
         )]
         config: PathBuf,
     },
+    #[structopt(name = "run", about = "Runs a command according to ya configuration")]
+    Run {
+        #[structopt(
+            short = "c",
+            long = "config",
+            help = "Location of configuration file",
+            required = false,
+            default_value = ".config/ya/ya.yml"
+        )]
+        config: PathBuf,
+    },
 }
 
 fn main() -> std::io::Result<()> {
@@ -65,6 +78,10 @@ fn main() -> std::io::Result<()> {
         Ya::Build { config } => {
             let config_str = config.to_str().expect("config path is not a valid UTF-8 sequence");
             handle_build(config_str).expect("failed to handle build command correctly");
+        }
+        Ya::Run { config } => {
+            let config_str = config.to_str().expect("config path is not a valid UTF-8 sequence");
+            handle_run(config_str).expect("failed to handle run command correctly");
         }
     }
 

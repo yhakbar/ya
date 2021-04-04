@@ -1,2 +1,2 @@
-// pub mod cross; // WIP
+pub mod shell;
 pub mod docker;
