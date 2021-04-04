@@ -21,4 +21,6 @@ SUBCOMMANDS:
     config    Print out the ya file
     help      Prints this message or the help of the given subcommand(s)
     init      Initializes ya project
+    run       Runs a command according to ya configuration
+    shell     Starts a shell according to ya configuration
 ```
