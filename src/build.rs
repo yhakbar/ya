@@ -1,6 +1,8 @@
 use serde_derive::{Serialize, Deserialize};
 
 use crate::configs::docker::build::DockerBuildConfig;
+use crate::configs::shell::build::ShellBuildConfig;
+
 use crate::ya::parse_ya_config_from_file;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -8,6 +10,8 @@ use crate::ya::parse_ya_config_from_file;
 pub enum BuildConfig {
     #[serde(rename = "docker")]
     DockerBuildConfig(DockerBuildConfig),
+    #[serde(rename = "shell")]
+    ShellBuildConfig(ShellBuildConfig),
 }
 
 pub trait Buildable {
@@ -18,6 +22,9 @@ impl Buildable for BuildConfig {
     fn build(&self) {
         match self {
             BuildConfig::DockerBuildConfig(buildable) => {
+                buildable.build();
+            }
+            BuildConfig::ShellBuildConfig(buildable) => {
                 buildable.build();
             }
         }

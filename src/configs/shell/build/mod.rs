@@ -3,18 +3,18 @@ use serde_derive::{Serialize, Deserialize};
 use crate::configs::shell::{Shell, RunShellCommand};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
-pub struct ShellRunConfig {
+pub struct ShellBuildConfig {
     shell: Option<String>,
     command: String,
 }
 
-impl ShellRunConfig {
-    pub fn run(&self) {
+impl ShellBuildConfig {
+    pub fn build(&self) {
         self.run_shell_command();
     }
 }
 
-impl Shell for ShellRunConfig {
+impl Shell for ShellBuildConfig {
     fn shell(&self) -> &str {
         match &self.shell {
             Some(shell) => &shell,

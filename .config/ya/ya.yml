@@ -3,14 +3,21 @@ name: ya
 
 config:
   build:
-    plugin: docker
+    # plugin: docker
+    # config:
+    #   image: ya-builder:latest
+    #   dockerfile: .config/docker/Dockerfile
+    #   docker_context: .config/docker
+    #   workdir: /app
+    #   volumes:
+    #     - $PWD:/app
+
+    plugin: shell
     config:
-      image: ya-builder:latest
-      dockerfile: .config/docker/Dockerfile
-      docker_context: .config/docker
-      workdir: /app
-      volumes:
-        - $PWD:/app
+      command: |
+        docker build -t ya-builder:latest -f .config/docker/Dockerfile .config/docker
+        docker run --rm -v $PWD:/app -w /app ya-builder
+
   run:
     plugin: shell
     config:
