@@ -17,7 +17,8 @@ FLAGS:
     -V, --version    Prints version information
 
 SUBCOMMANDS:
-    build    Runs a build according to ya configuration
-    help     Prints this message or the help of the given subcommand(s)
-    init     Initializes ya project
+    build     Runs a build according to ya configuration
+    config    Print out the ya file
+    help      Prints this message or the help of the given subcommand(s)
+    init      Initializes ya project
 ```
