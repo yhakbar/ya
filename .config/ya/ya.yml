@@ -9,30 +9,29 @@ config:
         if [[ "$(docker images -q ya-builder 2> /dev/null)" == "" ]]; then
           docker build -t ya-builder -f .config/docker/Dockerfile .config/docker
         fi
-          docker run --rm -v $PWD:/app -w /app ya-builder
 
-          cargo build --release --target x86_64-apple-darwin
-          cargo build --release --target aarch64-apple-darwin
+        docker run --rm -v $PWD:/app -w /app ya-builder
 
-          mkdir -p .ya-cache
-          for build in $(fd -tf 'ya$' --exclude deps target); do
-            cache_name="$(echo $build | sd 'target/([^/]+)/release/ya' 'ya-$1')"
-            cp "$build" .ya-cache/"$cache_name"
-          done
+        cargo build --release --target x86_64-apple-darwin
+        cargo build --release --target aarch64-apple-darwin
 
-    #
-    # Other Examples
-    #
-    # shell: python
-    # plugin: docker
-    # config:
-    #   image: ya-builder:latest
-    #   dockerfile: .config/docker/Dockerfile
-    #   docker_context: .config/docker
-    #   workdir: /app
-    #   volumes:
-    #     - $PWD:/app
-    #
+        mkdir -p .ya-cache
+        for build in $(fd -tf 'ya$' --exclude deps --exclude debug target); do
+          cache_name="$(echo $build | sd 'target/([^/]+)/release/ya' 'ya-$1')"
+          cp "$build" .ya-cache/"$cache_name"
+        done
+      #
+      # Other Examples
+      #
+      # plugin: docker
+      # config:
+      #   image: ya-builder:latest
+      #   dockerfile: .config/docker/Dockerfile
+      #   docker_context: .config/docker
+      #   workdir: /app
+      #   volumes:
+      #     - $PWD:/app
+      #
 
   run:
     plugin: shell
@@ -43,10 +42,9 @@ config:
   shell:
     plugin: shell
     config:
-      shell: docker
-      command: run -it --rm alpine
-    #
-    # Other Examples
-    #
-    # shell: python
-    #
+      command: docker run -it --rm --entrypoint bash -v $PWD:/app -w /app ya-builder
+      #
+      # Other Examples
+      #
+      # command: python3
+      #
