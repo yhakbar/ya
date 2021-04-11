@@ -10,8 +10,8 @@ pub struct ShellRunConfig {
 }
 
 impl ShellRunConfig {
-    pub fn run(&self, argument: &Option<String>) {
-        self.run_shell_command(argument);
+    pub fn run(&self, arguments: &Vec<String>) {
+        self.run_shell_command(arguments);
     }
 }
 

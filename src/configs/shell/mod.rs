@@ -35,7 +35,7 @@ trait Shell {
 }
 
 trait RunShellCommand {
-    fn run_shell_command(&self, argument: &Option<String>);
+    fn run_shell_command(&self, arguments: &Vec<String>);
 }
 
 trait StartInteractiveShell {
@@ -43,7 +43,7 @@ trait StartInteractiveShell {
 }
 
 impl<T> RunShellCommand for T where T: Shell {
-    fn run_shell_command(&self, argument: &Option<String>) {
+    fn run_shell_command(&self, arguments: &Vec<String>) {
         let shell = self.shell();
         let command = self.command();
         let argument_replacement_key = self.argument_replacement_key();
@@ -66,11 +66,9 @@ impl<T> RunShellCommand for T where T: Shell {
             Err(_e) => (),
         }
 
-        let stdout = match argument {
-            Some(argument) => {
-                let subbed_command = &command.replace(&argument_replacement_key, &argument);
+        let subbed_command = &command.replace(&argument_replacement_key, &arguments.join(" "));
 
-                Command::new(&shell)
+        let stdout = Command::new(&shell)
                 .env(&recursion_check, &command)
                 .arg("-c")
                 .arg(&subbed_command)
@@ -78,20 +76,34 @@ impl<T> RunShellCommand for T where T: Shell {
                 .spawn()
                 .unwrap()
                 .stdout
-                .unwrap()
-            }
-            None => {
-                Command::new(&shell)
-                .env(&recursion_check, &command)
-                .arg("-c")
-                .arg(&command)
-                .stdout(Stdio::piped())
-                .spawn()
-                .unwrap()
-                .stdout
-                .unwrap()
-            }
-        };
+                .unwrap();
+
+        // let stdout = match arguments {
+        //     Some(arguments) => {
+        //         let subbed_command = &command.replace(&argument_replacement_key, &arguments.join(" "));
+
+        //         Command::new(&shell)
+        //         .env(&recursion_check, &command)
+        //         .arg("-c")
+        //         .arg(&subbed_command)
+        //         .stdout(Stdio::piped())
+        //         .spawn()
+        //         .unwrap()
+        //         .stdout
+        //         .unwrap()
+        //     }
+        //     None => {
+        //         Command::new(&shell)
+        //         .env(&recursion_check, &command)
+        //         .arg("-c")
+        //         .arg(&command)
+        //         .stdout(Stdio::piped())
+        //         .spawn()
+        //         .unwrap()
+        //         .stdout
+        //         .unwrap()
+        //     }
+        // };
 
         let reader = BufReader::new(stdout);
 
