@@ -11,11 +11,11 @@ pub enum RunConfig {
 }
 
 pub trait Runnable {
-    fn run(&self, arguments: &Vec<String>);
+    fn run(&self, arguments: &[String]);
 }
 
 impl Runnable for RunConfig {
-    fn run(&self, arguments: &Vec<String>) {
+    fn run(&self, arguments: &[String]) {
         match self {
             RunConfig::ShellRunConfig(runnable) => {
                 runnable.run(arguments);
@@ -24,7 +24,7 @@ impl Runnable for RunConfig {
     }
 }
 
-pub fn handle_run(config: &str, arguments: &Vec<String>) -> std::io::Result<()> {
+pub fn handle_run(config: &str, arguments: &[String]) -> std::io::Result<()> {
     let ya_config = parse_ya_config_from_file(&config).expect("failed to parse config file");
     let run_config = ya_config.run.expect("run configuration must be defined when using run command");
 

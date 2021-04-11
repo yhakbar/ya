@@ -14,28 +14,10 @@ trait Shell {
     fn shell(&self) -> &str;
     fn command(&self) -> &str;
     fn argument_replacement_key(&self) -> &str;
-
-    fn sanitize_shell(_shell: &str) {
-        // Not actually sanitizing anything yet. Not sure what to sanitize.
-        ();
-    }
-
-    fn sanitize_command(_command: &str) {
-        // Not actually sanitizing anything yet. Not sure what to sanitize.
-        ();
-    }
-
-    fn sanitize_shell_command(&self) {
-        let shell = self.shell();
-        let command = self.command();
-
-        Self::sanitize_shell(shell);
-        Self::sanitize_command(command);
-    }
 }
 
 trait RunShellCommand {
-    fn run_shell_command(&self, arguments: &Vec<String>);
+    fn run_shell_command(&self, arguments: &[String]);
 }
 
 trait StartInteractiveShell {
@@ -43,12 +25,10 @@ trait StartInteractiveShell {
 }
 
 impl<T> RunShellCommand for T where T: Shell {
-    fn run_shell_command(&self, arguments: &Vec<String>) {
+    fn run_shell_command(&self, arguments: &[String]) {
         let shell = self.shell();
         let command = self.command();
         let argument_replacement_key = self.argument_replacement_key();
-
-        self.sanitize_shell_command();
 
         // This is how we'll avoid infinite recursion
         let recursion_check = "YA_SHELL_COMMAND";
