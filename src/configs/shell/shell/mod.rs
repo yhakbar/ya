@@ -5,7 +5,7 @@ use crate::configs::shell::{StartInteractiveShell};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct ShellShellConfig {
-    shell: String,
+    shell: Option<String>,
     command: Option<String>,
 }
 
@@ -17,12 +17,16 @@ impl ShellShellConfig {
 
 impl StartInteractiveShell for ShellShellConfig {
     fn start_interactive_shell(&self) {
-        let shell = &self.shell;
+        let shell = match &self.shell {
+            Some(shell) => &shell,
+            None => "bash",
+        };
 
         let child = match &self.command {
             Some(command) => {
-                Command::new(shell)
-                .args(command.split_whitespace())
+                Command::new(&shell)
+                .arg("-c")
+                .arg(&command)
                 .spawn()
                 .unwrap()
             }

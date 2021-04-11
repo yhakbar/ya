@@ -6,11 +6,12 @@ use crate::configs::shell::{Shell, RunShellCommand};
 pub struct ShellRunConfig {
     shell: Option<String>,
     command: String,
+    argument_replacement_key: Option<String>,
 }
 
 impl ShellRunConfig {
-    pub fn run(&self) {
-        self.run_shell_command();
+    pub fn run(&self, argument: &Option<String>) {
+        self.run_shell_command(argument);
     }
 }
 
@@ -23,5 +24,11 @@ impl Shell for ShellRunConfig {
     }
     fn command(&self) -> &str {
         &self.command
+    }
+    fn argument_replacement_key(&self) -> &str {
+        match &self.argument_replacement_key {
+            Some(argument_replacement_key) => &argument_replacement_key,
+            None => "$@",
+        }
     }
 }
