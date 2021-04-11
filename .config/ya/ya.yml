@@ -37,7 +37,7 @@ config:
     plugin: shell
     config:
       command: |
-        echo "Running away!"
+        echo "Running away $@!"
 
   shell:
     plugin: shell

@@ -25,8 +25,8 @@ enum Ya {
     #[structopt(name = "init", about = "Initializes ya project")]
     Init {
         #[structopt(
-            short = "c",
-            long = "config",
+            short,
+            long,
             help = "Location of configuration file",
             required = false,
             default_value = ".config/ya/ya.yml"
@@ -36,8 +36,8 @@ enum Ya {
     #[structopt(name = "config", about = "Print out the ya file")]
     Config {
         #[structopt(
-            short = "c",
-            long = "config",
+            short,
+            long,
             help = "Location of configuration file",
             required = false,
             default_value = ".config/ya/ya.yml"
@@ -47,8 +47,8 @@ enum Ya {
     #[structopt(name = "build", about = "Runs a build according to ya configuration")]
     Build {
         #[structopt(
-            short = "c",
-            long = "config",
+            short,
+            long,
             help = "Location of configuration file",
             required = false,
             default_value = ".config/ya/ya.yml"
@@ -58,19 +58,23 @@ enum Ya {
     #[structopt(name = "run", about = "Runs a command according to ya configuration")]
     Run {
         #[structopt(
-            short = "c",
-            long = "config",
+            short,
+            long,
             help = "Location of configuration file",
             required = false,
             default_value = ".config/ya/ya.yml"
         )]
         config: PathBuf,
+        #[structopt(
+            help = "Optional argument to pass into run command"
+        )]
+        argument: Option<String>
     },
     #[structopt(name = "shell", about = "Starts a shell according to ya configuration")]
     Shell {
         #[structopt(
-            short = "c",
-            long = "config",
+            short,
+            long,
             help = "Location of configuration file",
             required = false,
             default_value = ".config/ya/ya.yml"
@@ -93,9 +97,9 @@ fn main() -> std::io::Result<()> {
             let config_str = config.to_str().expect("config path is not a valid UTF-8 sequence");
             handle_build(config_str).expect("failed to handle build command correctly");
         }
-        Ya::Run { config } => {
+        Ya::Run { config, argument } => {
             let config_str = config.to_str().expect("config path is not a valid UTF-8 sequence");
-            handle_run(config_str).expect("failed to handle run command correctly");
+            handle_run(config_str, &argument).expect("failed to handle run command correctly");
         }
         Ya::Shell { config } => {
             let config_str = config.to_str().expect("config path is not a valid UTF-8 sequence");

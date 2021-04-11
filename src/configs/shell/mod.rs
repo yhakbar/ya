@@ -3,39 +3,26 @@ pub mod build;
 #[allow(clippy::module_inception)]
 pub mod shell;
 
-use log::warn;
 use std::env;
+use log::warn;
 
 use std::process::{Command, Stdio};
 use std::io::{BufRead, BufReader};
+use std::{thread, time};
 
 trait Shell {
     fn shell(&self) -> &str;
     fn command(&self) -> &str;
+    fn argument_replacement_key(&self) -> &str;
 
-    fn sanitize_shell(shell: &str) {
-        // This insufficiently sanitizes the command being run
-        if shell.contains("ya") {
-            // This is a bad solution, but I don't know how to make a better one.
-            // There should be some sort of catch that the command being run
-            // within one of these commands isn't a ya command, as that can infinitely
-            // recur.
-            //
-            warn!("Warning! we've got a ya in here");
-        }
+    fn sanitize_shell(_shell: &str) {
+        // Not actually sanitizing anything yet. Not sure what to sanitize.
+        ();
     }
 
-    fn sanitize_command(command: &str) {
-        // This insufficiently sanitizes the command being run
-        if command.contains("ya") {
-            // This is a bad solution, but I don't know how to make a better one.
-            //
-            // There should be some sort of catch that the command being run
-            // within one of these commands isn't a ya command, as that can infinitely
-            // recur.
-            //
-            warn!("Warning! we've got a ya in here");
-        }
+    fn sanitize_command(_command: &str) {
+        // Not actually sanitizing anything yet. Not sure what to sanitize.
+        ();
     }
 
     fn sanitize_shell_command(&self) {
@@ -48,7 +35,7 @@ trait Shell {
 }
 
 trait RunShellCommand {
-    fn run_shell_command(&self);
+    fn run_shell_command(&self, argument: &Option<String>);
 }
 
 trait StartInteractiveShell {
@@ -56,9 +43,10 @@ trait StartInteractiveShell {
 }
 
 impl<T> RunShellCommand for T where T: Shell {
-    fn run_shell_command(&self) {
+    fn run_shell_command(&self, argument: &Option<String>) {
         let shell = self.shell();
         let command = self.command();
+        let argument_replacement_key = self.argument_replacement_key();
 
         self.sanitize_shell_command();
 
@@ -66,25 +54,50 @@ impl<T> RunShellCommand for T where T: Shell {
         let recursion_check = "YA_SHELL_COMMAND";
 
         match env::var(&recursion_check) {
-            Ok(_val) => panic!("environment variable {} detected. ya commands cannot be run within ya commands, as that might result in infinite recursion", recursion_check),
-            Err(_e) => {
-                let stdout = Command::new(&shell)
-                .env(&recursion_check, "true")
+            Ok(parent_command) => {
+                if parent_command == command {
+                    panic!("Environment variable {}='{}'\nI'm being asked to run '{}'\nInfinite recursion likely.", recursion_check, parent_command, command);
+                }
+                // Let's wait any time there is a chance of infinite recursion
+                warn!("recursive ya call {} from {}", command, parent_command);
+                let ten_millis = time::Duration::from_millis(10);
+                thread::sleep(ten_millis);
+            }
+            Err(_e) => (),
+        }
+
+        let stdout = match argument {
+            Some(argument) => {
+                let subbed_command = &command.replace(&argument_replacement_key, &argument);
+
+                Command::new(&shell)
+                .env(&recursion_check, &command)
+                .arg("-c")
+                .arg(&subbed_command)
+                .stdout(Stdio::piped())
+                .spawn()
+                .unwrap()
+                .stdout
+                .unwrap()
+            }
+            None => {
+                Command::new(&shell)
+                .env(&recursion_check, &command)
                 .arg("-c")
                 .arg(&command)
                 .stdout(Stdio::piped())
                 .spawn()
                 .unwrap()
                 .stdout
-                .unwrap();
+                .unwrap()
+            }
+        };
 
-                let reader = BufReader::new(stdout);
+        let reader = BufReader::new(stdout);
 
-                reader
-                    .lines()
-                    .filter_map(|line| line.ok())
-                    .for_each(|line| println!("{}", line));
-            },
-        }
+        reader
+            .lines()
+            .filter_map(|line| line.ok())
+            .for_each(|line| println!("{}", line));
     }
 }

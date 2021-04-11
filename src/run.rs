@@ -11,24 +11,24 @@ pub enum RunConfig {
 }
 
 pub trait Runnable {
-    fn run(&self);
+    fn run(&self, argument: &Option<String>);
 }
 
 impl Runnable for RunConfig {
-    fn run(&self) {
+    fn run(&self, argument: &Option<String>) {
         match self {
             RunConfig::ShellRunConfig(runnable) => {
-                runnable.run();
+                runnable.run(argument);
             }
         }
     }
 }
 
-pub fn handle_run(config: &str) -> std::io::Result<()> {
+pub fn handle_run(config: &str, argument: &Option<String>) -> std::io::Result<()> {
     let ya_config = parse_ya_config_from_file(&config).expect("failed to parse config file");
     let run_config = ya_config.run.expect("run configuration must be defined when using run command");
 
-    run_config.run();
+    run_config.run(argument);
 
     Ok(())
 }
