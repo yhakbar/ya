@@ -1,4 +1,4 @@
-use serde_derive::{Serialize, Deserialize};
+use serde_derive::{Deserialize, Serialize};
 
 use crate::configs::shell::shell::ShellShellConfig;
 
@@ -27,7 +27,9 @@ impl Shellable for ShellConfig {
 
 pub fn handle_shell(config: &str) -> std::io::Result<()> {
     let ya_config = parse_ya_config_from_file(&config).expect("failed to parse config file");
-    let shell_config = ya_config.shell.expect("shell configuration must be defined when using shell command");
+    let shell_config = ya_config
+        .shell
+        .expect("shell configuration must be defined when using shell command");
 
     shell_config.shell();
 

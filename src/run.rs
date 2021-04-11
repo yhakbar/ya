@@ -1,4 +1,4 @@
-use serde_derive::{Serialize, Deserialize};
+use serde_derive::{Deserialize, Serialize};
 
 use crate::configs::shell::run::ShellRunConfig;
 use crate::ya::parse_ya_config_from_file;
@@ -26,7 +26,9 @@ impl Runnable for RunConfig {
 
 pub fn handle_run(config: &str, arguments: &[String]) -> std::io::Result<()> {
     let ya_config = parse_ya_config_from_file(&config).expect("failed to parse config file");
-    let run_config = ya_config.run.expect("run configuration must be defined when using run command");
+    let run_config = ya_config
+        .run
+        .expect("run configuration must be defined when using run command");
 
     run_config.run(arguments);
 

@@ -38,13 +38,24 @@ config:
   run:
     plugin: shell
     config:
-      command: |
-        echo "Running away $@!"
+      command: echo "Running away <names>!"
+      argument_replacement_key: <names>
+      #
+      # Other Examples
+      #
+      # command: echo "Running away $@!"
+      #
+      # command: Running away!
+      #
 
   shell:
     plugin: shell
     config:
-      command: docker run -it --rm --entrypoint bash -v $PWD:/app -w /app ya-builder
+      command: |
+        if [[ "$(docker images -q ya-builder 2> /dev/null)" == "" ]]; then
+          docker build -t ya-builder -f .config/docker/Dockerfile .config/docker
+        fi
+        docker run -it --rm --entrypoint bash -v $PWD:/app -w /app ya-builder
       #
       # Other Examples
       #

@@ -1,6 +1,6 @@
 use std::env;
 
-use serde_derive::{Serialize, Deserialize};
+use serde_derive::{Deserialize, Serialize};
 
 use std::process::Command;
 
@@ -15,9 +15,18 @@ pub struct DockerBuildConfig {
 
 impl DockerBuildConfig {
     fn build_docker_image(&self) {
-        let image = &self.image.as_ref().expect("image must be defined to build image");
-        let dockerfile = &self.dockerfile.as_ref().expect("dockerfile must be defined to build image");
-        let docker_context = &self.docker_context.as_ref().expect("docker_context must be defined to build image");
+        let image = &self
+            .image
+            .as_ref()
+            .expect("image must be defined to build image");
+        let dockerfile = &self
+            .dockerfile
+            .as_ref()
+            .expect("dockerfile must be defined to build image");
+        let docker_context = &self
+            .docker_context
+            .as_ref()
+            .expect("docker_context must be defined to build image");
         let build_output = Command::new("docker")
             .arg("build")
             .arg("-t")
@@ -35,8 +44,14 @@ impl DockerBuildConfig {
     fn run_docker_container(&self) {
         let pwd = env::current_dir().unwrap().to_str().unwrap().to_string();
         let volume_mount = str::replace("$PWD:/app", "$PWD", &pwd);
-        let workdir = &self.workdir.as_ref().expect("workdir must be defined to run container");
-        let image = &self.image.as_ref().expect("image must be defined to run container");
+        let workdir = &self
+            .workdir
+            .as_ref()
+            .expect("workdir must be defined to run container");
+        let image = &self
+            .image
+            .as_ref()
+            .expect("image must be defined to run container");
         let build_output = Command::new("docker")
             .arg("run")
             .arg("--rm")

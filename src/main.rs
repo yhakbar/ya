@@ -5,14 +5,14 @@ mod configs;
 mod fs;
 mod ya;
 
-mod init;
 mod build;
+mod init;
 mod run;
 mod shell;
 
-use crate::init::handle_init;
-use crate::config::handle_config;
 use crate::build::handle_build;
+use crate::config::handle_config;
+use crate::init::handle_init;
 use crate::run::handle_run;
 use crate::shell::handle_shell;
 
@@ -54,10 +54,8 @@ enum Ya {
             default_value = ".config/ya/ya.yml"
         )]
         config: PathBuf,
-        #[structopt(
-            help = "Optional arguments to pass into run command"
-        )]
-        arguments: Vec<String>
+        #[structopt(help = "Optional arguments to pass into run command")]
+        arguments: Vec<String>,
     },
     #[structopt(name = "run", about = "Runs a command according to ya configuration")]
     Run {
@@ -69,10 +67,8 @@ enum Ya {
             default_value = ".config/ya/ya.yml"
         )]
         config: PathBuf,
-        #[structopt(
-            help = "Optional arguments to pass into run command"
-        )]
-        arguments: Vec<String>
+        #[structopt(help = "Optional arguments to pass into run command")]
+        arguments: Vec<String>,
     },
     #[structopt(name = "shell", about = "Starts a shell according to ya configuration")]
     Shell {
@@ -94,19 +90,27 @@ fn main() -> std::io::Result<()> {
             handle_init(&config)?;
         }
         Ya::Config { config } => {
-            let config_str = config.to_str().expect("config path is not a valid UTF-8 sequence");
+            let config_str = config
+                .to_str()
+                .expect("config path is not a valid UTF-8 sequence");
             handle_config(config_str).expect("failed to handle configuration command correctly");
         }
         Ya::Build { config, arguments } => {
-            let config_str = config.to_str().expect("config path is not a valid UTF-8 sequence");
+            let config_str = config
+                .to_str()
+                .expect("config path is not a valid UTF-8 sequence");
             handle_build(config_str, &arguments).expect("failed to handle build command correctly");
         }
         Ya::Run { config, arguments } => {
-            let config_str = config.to_str().expect("config path is not a valid UTF-8 sequence");
+            let config_str = config
+                .to_str()
+                .expect("config path is not a valid UTF-8 sequence");
             handle_run(config_str, &arguments).expect("failed to handle run command correctly");
         }
         Ya::Shell { config } => {
-            let config_str = config.to_str().expect("config path is not a valid UTF-8 sequence");
+            let config_str = config
+                .to_str()
+                .expect("config path is not a valid UTF-8 sequence");
             handle_shell(config_str).expect("failed to handle shell command correctly");
         }
     }

@@ -1,13 +1,13 @@
-pub mod run;
 pub mod build;
+pub mod run;
 #[allow(clippy::module_inception)]
 pub mod shell;
 
-use std::env;
 use log::warn;
+use std::env;
 
-use std::process::{Command, Stdio};
 use std::io::{BufRead, BufReader};
+use std::process::{Command, Stdio};
 use std::{thread, time};
 
 trait Shell {
@@ -24,7 +24,10 @@ trait StartInteractiveShell {
     fn start_interactive_shell(&self);
 }
 
-impl<T> RunShellCommand for T where T: Shell {
+impl<T> RunShellCommand for T
+where
+    T: Shell,
+{
     fn run_shell_command(&self, arguments: &[String]) {
         let shell = self.shell();
         let command = self.command();
@@ -49,14 +52,14 @@ impl<T> RunShellCommand for T where T: Shell {
         let subbed_command = &command.replace(&argument_replacement_key, &arguments.join(" "));
 
         let stdout = Command::new(&shell)
-                .env(&recursion_check, &command)
-                .arg("-c")
-                .arg(&subbed_command)
-                .stdout(Stdio::piped())
-                .spawn()
-                .unwrap()
-                .stdout
-                .unwrap();
+            .env(&recursion_check, &command)
+            .arg("-c")
+            .arg(&subbed_command)
+            .stdout(Stdio::piped())
+            .spawn()
+            .unwrap()
+            .stdout
+            .unwrap();
 
         // let stdout = match arguments {
         //     Some(arguments) => {

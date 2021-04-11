@@ -1,2 +1,2 @@
-pub mod shell;
 pub mod docker;
+pub mod shell;

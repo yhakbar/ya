@@ -1,6 +1,6 @@
-use serde_derive::{Serialize, Deserialize};
+use serde_derive::{Deserialize, Serialize};
 
-use crate::configs::shell::{Shell, RunShellCommand};
+use crate::configs::shell::{RunShellCommand, Shell};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct ShellRunConfig {

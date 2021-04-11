@@ -1,7 +1,7 @@
-use serde_derive::{Serialize, Deserialize};
-use std::process::{Command};
+use serde_derive::{Deserialize, Serialize};
+use std::process::Command;
 
-use crate::configs::shell::{StartInteractiveShell};
+use crate::configs::shell::StartInteractiveShell;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct ShellShellConfig {
@@ -23,18 +23,12 @@ impl StartInteractiveShell for ShellShellConfig {
         };
 
         let child = match &self.command {
-            Some(command) => {
-                Command::new(&shell)
+            Some(command) => Command::new(&shell)
                 .arg("-c")
                 .arg(&command)
                 .spawn()
-                .unwrap()
-            }
-            None => {
-                Command::new(&shell)
-                .spawn()
-                .unwrap()
-            }
+                .unwrap(),
+            None => Command::new(&shell).spawn().unwrap(),
         };
 
         child.wait_with_output().unwrap();

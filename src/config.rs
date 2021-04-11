@@ -1,4 +1,3 @@
-
 use crate::ya::parse_ya_from_file;
 
 pub fn handle_config(config: &str) -> std::io::Result<()> {
