@@ -28,6 +28,6 @@ pub fn parse_ya_from_file(file: &str) -> Result<YaFile, Box<dyn Error>> {
 }
 
 pub fn parse_ya_config_from_file(file: &str) -> Result<YaConfig, Box<dyn Error>> {
-    let config = parse_ya_from_file(file).expect("Failed to parse ya from file").config;
+    let config = parse_ya_from_file(file).expect("failed to parse ya from file").config;
     Ok(config)
 }

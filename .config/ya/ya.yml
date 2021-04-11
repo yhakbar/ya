@@ -10,6 +10,8 @@ config:
           docker build -t ya-builder -f .config/docker/Dockerfile .config/docker
         fi
 
+        cargo clean
+
         docker run --rm -v $PWD:/app -w /app ya-builder
 
         cargo build --release --target x86_64-apple-darwin

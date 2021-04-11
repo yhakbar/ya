@@ -31,7 +31,7 @@ impl StartInteractiveShell for ShellShellConfig {
                 .unwrap()
             }
             None => {
-                Command::new(shell)
+                Command::new(&shell)
                 .spawn()
                 .unwrap()
             }
