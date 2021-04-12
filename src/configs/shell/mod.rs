@@ -17,7 +17,7 @@ trait Shell {
 }
 
 trait RunShellCommand {
-    fn run_shell_command(&self, arguments: &[String]);
+    fn run_shell_command(&self, arguments: &[String], no_arguments: bool);
 }
 
 trait StartInteractiveShell {
@@ -28,7 +28,7 @@ impl<T> RunShellCommand for T
 where
     T: Shell,
 {
-    fn run_shell_command(&self, arguments: &[String]) {
+    fn run_shell_command(&self, arguments: &[String], no_arguments: bool) {
         let shell = self.shell();
         let command = self.command();
         let argument_replacement_key = self.argument_replacement_key();
@@ -49,7 +49,11 @@ where
             Err(_e) => (),
         }
 
-        let subbed_command = &command.replace(&argument_replacement_key, &arguments.join(" "));
+        let subbed_command = if no_arguments {
+            command.to_owned()
+        } else {
+            command.replace(&argument_replacement_key, &arguments.join(" "))
+        };
 
         let stdout = Command::new(&shell)
             .env(&recursion_check, &command)

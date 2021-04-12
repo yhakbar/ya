@@ -10,8 +10,8 @@ pub struct ShellBuildConfig {
 }
 
 impl ShellBuildConfig {
-    pub fn build(&self, arguments: &[String]) {
-        self.run_shell_command(arguments);
+    pub fn build(&self, arguments: &[String], no_arguments: bool) {
+        self.run_shell_command(arguments, no_arguments);
     }
 }
 

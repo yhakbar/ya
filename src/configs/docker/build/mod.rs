@@ -66,7 +66,7 @@ impl DockerBuildConfig {
         println!("{}", String::from_utf8_lossy(&build_output.stderr));
     }
 
-    pub fn build(&self, _arguments: &[String]) {
+    pub fn build(&self, _arguments: &[String], _no_arguments: bool) {
         self.build_docker_image();
         self.run_docker_container();
     }

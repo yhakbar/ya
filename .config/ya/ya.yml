@@ -17,7 +17,7 @@ config:
 
         cargo clean
 
-        docker run --rm -v $PWD:/app -w /app ya-builder
+        ya run "cargo build --release --target aarch64-unknown-linux-gnu"
 
         cargo build --release --target x86_64-apple-darwin
         cargo build --release --target aarch64-apple-darwin
@@ -43,10 +43,17 @@ config:
   run:
     plugin: shell
     config:
-      command: echo "Running away <names>!"
-      argument_replacement_key: <names>
+      command: |
+        if [[ "$(docker images -q ya-builder 2> /dev/null)" == "" ]]; then
+          docker build -t ya-builder -f .config/docker/Dockerfile .config/docker
+        fi
+
+        docker run -t --rm -v $PWD:/app ya-builder -c "$@"
       #
       # Other Examples
+      #
+      # command: echo "Running away <names>!"
+      # argument_replacement_key: <names>
       #
       # command: echo "Running away $@!"
       #
@@ -60,7 +67,7 @@ config:
         if [[ "$(docker images -q ya-builder 2> /dev/null)" == "" ]]; then
           docker build -t ya-builder -f .config/docker/Dockerfile .config/docker
         fi
-        docker run -it --rm --entrypoint bash -v $PWD:/app -w /app ya-builder
+        docker run -it --rm -v $PWD:/app ya-builder
       #
       # Other Examples
       #
