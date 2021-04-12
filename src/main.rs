@@ -26,6 +26,12 @@ enum Ya {
             default_value = ".config/ya/ya.yml"
         )]
         config: String,
+        #[structopt(
+            short,
+            long,
+            help = "Name of this project",
+        )]
+        name: Option<String>
     },
     #[structopt(name = "config", about = "Print out the ya file")]
     Config {
@@ -88,8 +94,8 @@ enum Ya {
 fn main() -> std::io::Result<()> {
     let args = Ya::from_args();
     match args {
-        Ya::Init { config } => {
-            handle_init(&config)?;
+        Ya::Init { config, name } => {
+            handle_init(&config, &name)?;
         }
         Ya::Config { config } => {
             let config_str = config

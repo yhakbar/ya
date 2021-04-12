@@ -6,6 +6,7 @@ use handlebars::Handlebars;
 use std::collections::HashMap;
 use std::path::Path;
 use std::fs::File;
+use std::env;
 
 use crate::ya::parse_ya_from_file;
 
@@ -29,13 +30,24 @@ fn register_default_templates(handlebars: &mut Handlebars) {
     .unwrap();
 }
 
-pub fn handle_init(config: &str) -> std::io::Result<()> {
+pub fn handle_init(config: &str, name: &Option<String>) -> std::io::Result<()> {
   let mut handlebars = Handlebars::new();
 
   register_default_templates(&mut handlebars);
 
   let mut data = HashMap::new();
-  data.insert("name", "ya");
+
+  let curr_dir = env::current_dir().unwrap();
+  let dir_name = curr_dir.file_name().unwrap().to_str().unwrap().to_string();
+
+  match &name {
+    Some(name) => {
+      data.insert("name", name);
+    }
+    None => {
+      data.insert("name", &dir_name);
+    }
+  }
 
   if ! path_exists(&config) {
     create_path_to_file(&config);
@@ -51,7 +63,7 @@ pub fn handle_init(config: &str) -> std::io::Result<()> {
     Some(deps) => {
       for dep in deps {
         let src = dep.src.unwrap();
-        let file = dep.file;
+        let file = dep.file.unwrap();
 
         let config_path = Path::new(&config);
         let config_folder = get_path_folder(&config_path);
