@@ -1,0 +1,32 @@
+---
+name: ya
+
+deps:
+  - name: Dockerfile
+    src: default_docker
+    file: ./docker/Dockerfile
+
+config:
+  build:
+    plugin: shell
+    config:
+      command: |
+        docker build -t ya-builder -f .config/docker/Dockerfile .config/docker
+
+  run:
+    plugin: shell
+    config:
+      command: |
+        if [[ "$(docker images -q ya-builder 2> /dev/null)" == "" ]]; then
+          ya build
+        fi
+        docker run -it --rm -v $PWD:/app ya-builder -c "$@"
+
+  shell:
+    plugin: shell
+    config:
+      command: |
+        if [[ "$(docker images -q ya-builder 2> /dev/null)" == "" ]]; then
+          ya build
+        fi
+        docker run -it --rm -v $PWD:/app ya-builder

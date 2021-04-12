@@ -1,6 +1,9 @@
 ---
 name: ya
 
+deps:
+  - ../docker/Dockerfile
+
 config:
   build:
     plugin: shell

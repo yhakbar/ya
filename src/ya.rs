@@ -2,15 +2,17 @@ use serde_derive::{Deserialize, Serialize};
 use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
+use std::path::PathBuf;
 
-use crate::build::BuildConfig;
-use crate::run::RunConfig;
-use crate::shell::ShellConfig;
+use crate::handlers::build::BuildConfig;
+use crate::handlers::run::RunConfig;
+use crate::handlers::shell::ShellConfig;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct YaFile {
     name: String,
     config: YaConfig,
+    pub deps: Option<Vec<YaDep>>,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -18,6 +20,13 @@ pub struct YaConfig {
     pub build: Option<BuildConfig>,
     pub run: Option<RunConfig>,
     pub shell: Option<ShellConfig>,
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+pub struct YaDep {
+    pub name: Option<String>,
+    pub src: PathBuf,
+    pub file: PathBuf,
 }
 
 pub fn parse_ya_from_file(file: &str) -> Result<YaFile, Box<dyn Error>> {

@@ -1,20 +1,14 @@
 #![deny(unused_crate_dependencies)]
 
-mod config;
 mod configs;
-mod fs;
+mod handlers;
 mod ya;
 
-mod build;
-mod init;
-mod run;
-mod shell;
-
-use crate::build::handle_build;
-use crate::config::handle_config;
-use crate::init::handle_init;
-use crate::run::handle_run;
-use crate::shell::handle_shell;
+use crate::handlers::build::handle_build;
+use crate::handlers::config::handle_config;
+use crate::handlers::init::handle_init;
+use crate::handlers::run::handle_run;
+use crate::handlers::shell::handle_shell;
 
 use std::path::PathBuf;
 use structopt::StructOpt;
@@ -54,6 +48,10 @@ enum Ya {
             default_value = ".config/ya/ya.yml"
         )]
         config: PathBuf,
+        //
+        // TODO: Add --no-arguments
+        // We would just not do any argument substitution through $@
+        //
         #[structopt(help = "Optional arguments to pass into run command")]
         arguments: Vec<String>,
     },
@@ -67,6 +65,10 @@ enum Ya {
             default_value = ".config/ya/ya.yml"
         )]
         config: PathBuf,
+        //
+        // TODO: Add --no-arguments
+        // We would just not do any argument substitution through $@
+        //
         #[structopt(help = "Optional arguments to pass into run command")]
         arguments: Vec<String>,
     },
