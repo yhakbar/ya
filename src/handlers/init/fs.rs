@@ -15,10 +15,11 @@ pub fn get_path_prefix(path: &Path) -> String {
     path.parent().unwrap().to_str().unwrap().to_string()
 }
 
-pub fn create_path_to_file(path: &str) {
+pub fn create_path_to_file(path: &str) -> String {
     let fs_path = Path::new(&path);
     let prefix = get_path_prefix(&fs_path);
     if !path_exists(&prefix) {
         create_dir_all(&prefix).unwrap();
     }
+    prefix
 }

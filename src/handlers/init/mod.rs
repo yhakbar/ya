@@ -35,25 +35,25 @@ pub fn handle_init(config: &str, name: &Option<String>) -> std::io::Result<()> {
 
   register_default_templates(&mut handlebars);
 
-  let mut data = HashMap::new();
+  let mut replacement_keys = HashMap::new();
 
   let curr_dir = env::current_dir().unwrap();
   let dir_name = curr_dir.file_name().unwrap().to_str().unwrap().to_string();
 
-  match &name {
-    Some(name) => {
-      data.insert("name", name);
-    }
-    None => {
-      data.insert("name", &dir_name);
-    }
-  }
+  let name = match name {
+    Some(name) => name,
+    None => &dir_name
+  };
+
+  replacement_keys.insert("name", name);
 
   if ! path_exists(&config) {
-    create_path_to_file(&config);
+    let path_prefix = create_path_to_file(&config);
+
+    replacement_keys.insert("workdir", &path_prefix);
 
     let mut f = File::create(&config).unwrap();
-    handlebars.render_to_write("default", &data, &mut f).unwrap();
+    handlebars.render_to_write("default", &replacement_keys, &mut f).unwrap();
   }
 
   let ya_file = parse_ya_from_file(&config).expect("failed to parse config file");
@@ -62,6 +62,9 @@ pub fn handle_init(config: &str, name: &Option<String>) -> std::io::Result<()> {
     None => (),
     Some(deps) => {
       for dep in deps {
+        let mut replacement_keys = HashMap::new();
+        replacement_keys.insert("name", name);
+
         let src = dep.src.unwrap();
         let file = dep.file.unwrap();
 
@@ -72,9 +75,9 @@ pub fn handle_init(config: &str, name: &Option<String>) -> std::io::Result<()> {
         let dep_config = &dep_path.to_str().unwrap();
 
         if ! path_exists(&dep_config) {
-          fs::create_path_to_file(&dep_config);
+          create_path_to_file(&dep_config);
           let mut f = File::create(&dep_config).unwrap();
-          handlebars.render_to_write(&src, &data, &mut f).unwrap();
+          handlebars.render_to_write(&src, &replacement_keys, &mut f).unwrap();
         }
       }
     }

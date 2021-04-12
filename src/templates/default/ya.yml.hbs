@@ -11,7 +11,7 @@ config:
     plugin: shell
     config:
       command: |
-        docker build -t {{ name }}-builder -f .config/docker/Dockerfile .config/docker
+        docker build -t {{ name }}-builder -f {{ workdir }}/docker/Dockerfile {{ workdir }}/docker
 
   run:
     plugin: shell
@@ -20,7 +20,7 @@ config:
         if [[ "$(docker images -q {{ name }}-builder 2> /dev/null)" == "" ]]; then
           ya build
         fi
-        docker run -it --rm -v $PWD:/app {{ name }}-builder -c "$@"
+        docker run -t --rm -v $PWD:/app {{ name }}-builder -c "$@"
 
   shell:
     plugin: shell
