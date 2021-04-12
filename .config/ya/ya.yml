@@ -2,7 +2,9 @@
 name: ya
 
 deps:
-  - ../docker/Dockerfile
+  - name: Dockerfile
+    src: default_docker
+    file: ../docker/Dockerfile
 
 config:
   build:
