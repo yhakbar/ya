@@ -25,8 +25,8 @@ pub struct YaConfig {
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct YaDep {
     pub name: Option<String>,
-    pub src: PathBuf,
-    pub file: PathBuf,
+    pub src: Option<String>,
+    pub file: Option<PathBuf>,
 }
 
 pub fn parse_ya_from_file(file: &str) -> Result<YaFile, Box<dyn Error>> {
