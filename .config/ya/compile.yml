@@ -1,0 +1,29 @@
+---
+name: ya
+
+deps:
+  - name: Dockerfile
+    src: default_docker
+    file: ../docker/Dockerfile
+
+config:
+  build:
+    plugin: shell
+    config:
+      command: |
+        if [[ "$(docker images -q ya-builder 2> /dev/null)" == "" ]]; then
+          docker build -t ya-builder -f .config/docker/Dockerfile .config/docker
+        fi
+
+        cargo clean
+
+        ya run "cargo build --release --target aarch64-unknown-linux-gnu"
+
+        cargo build --release --target x86_64-apple-darwin
+        cargo build --release --target aarch64-apple-darwin
+
+        mkdir -p .ya-cache
+        for build in $(fd -tf 'ya$' --exclude deps --exclude debug target); do
+          cache_name="$(echo $build | sd 'target/([^/]+)/release/ya' 'ya-$1')"
+          cp "$build" .ya-cache/"$cache_name"
+        done

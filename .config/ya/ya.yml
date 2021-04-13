@@ -11,9 +11,7 @@ config:
     plugin: shell
     config:
       command: |
-        if [[ "$(docker images -q ya-builder 2> /dev/null)" == "" ]]; then
-          docker build -t ya-builder -f .config/docker/Dockerfile .config/docker
-        fi
+        docker build -t ya-builder -f .config/docker/Dockerfile .
 
         cargo clean
 

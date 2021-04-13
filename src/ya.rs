@@ -2,7 +2,7 @@ use serde_derive::{Deserialize, Serialize};
 use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::handlers::build::BuildConfig;
 use crate::handlers::run::RunConfig;
@@ -37,8 +37,16 @@ pub fn parse_ya_from_file(file: &str) -> Result<YaFile, Box<dyn Error>> {
 }
 
 pub fn parse_ya_config_from_file(file: &str) -> Result<YaConfig, Box<dyn Error>> {
-    let config = parse_ya_from_file(file)
+    let config = if Path::new(file).exists() {
+        parse_ya_from_file(file)
         .expect("failed to parse ya from file")
-        .config;
+        .config
+    } else {
+        let ya_file = format!(".config/ya/{}.yml", file);
+        parse_ya_from_file(&ya_file)
+        .expect("failed to parse ya from file @ default path .config/ya/<name>.yml")
+        .config
+    };
+
     Ok(config)
 }
