@@ -1,6 +1,8 @@
 # Ya
 
-This is a command emulation tool designed to make common tasks required for running utilities related to a project easy.
+:warning: This software is still in early stages and unstable. Use with care. :warning:
+
+This is a command abstraction tool designed to make common tasks for utilities related to a project easy.
 
 ## Usage
 
@@ -24,3 +26,7 @@ SUBCOMMANDS:
     run       Runs a command according to ya configuration
     shell     Starts a shell according to ya configuration
 ```
+
+## Documentation
+
+Click [here](/docs) for more documentation.
