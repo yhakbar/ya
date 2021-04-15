@@ -1,5 +1,7 @@
 # Run
 
+Runs a command according to ya configuration.
+
 ```yaml
 USAGE:
     ya run [FLAGS] [OPTIONS] [arguments]...
@@ -16,7 +18,7 @@ ARGS:
     <arguments>...    Optional arguments to pass into run command
 ```
 
-The run command is designed to provide a way to automate a specific action taken to interact with your project.
+The run command automates action(s) taken to interact with your project.
 
 ## Ya Config Syntax
 
@@ -28,7 +30,10 @@ config:
       command: echo hello
 ```
 
-This command, for example, will execute the command `echo hello` within a child `bash` shell.
+```bash
+$ ya run
+hello
+```
 
 ### Shell
 
@@ -41,6 +46,11 @@ config:
     config:
       shell: python3
       command: print("hello")
+```
+
+```bash
+$ ya run
+hello
 ```
 
 ### Arguments
@@ -75,6 +85,11 @@ config:
       argument_replacement_key: <target_of_salutation>
 ```
 
+```bash
+$ ya run my friend!
+hello my friend!
+```
+
 ### Complexity
 
 Adjust the complexity of your run command according to the complexity of the tasks you need to perform with that configuration file.
@@ -92,10 +107,13 @@ config:
         docker run -t --rm -v $PWD:/app ya-builder -c "$@"
 ```
 
+```bash
+$ ya run cargo
+hello my friend!
+```
+
 At the time of writing, this is the run config of this project.
 
-Associated with this project is a [Dockerfile](/.config/docker/Dockerfile). That Dockerfile installs for all the utilities required to work with this project.
+Associated with this project is a [Dockerfile](/.config/docker/Dockerfile). That Dockerfile installs for all the utilities required to work with this project in a Docker image.
 
-Note that this config has a dependency on `ya build`.
-
-Build commands differ from run commands in that they are designed to have verifiable artifact(s) produced as a consequence of their command.
+When a run command is used with this configuration, a container running that image is used to execute commands that needed for this project.
