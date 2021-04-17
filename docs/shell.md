@@ -1,6 +1,6 @@
 # Run
 
-Starts a shell according to ya configuration
+Starts a shell according to ya [configuration](./config).
 
 ```yaml
 USAGE:
@@ -40,9 +40,7 @@ config:
       shell: python3
 ```
 
-### Complexity
-
-Adjust the complexity of your shell command according to the complexity of the tasks you need to perform with that configuration file.
+### This Project's Configurations
 
 ```yaml
 config:

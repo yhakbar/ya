@@ -1,6 +1,6 @@
 # Run
 
-Runs a command according to ya configuration.
+Runs a command according to ya [configuration](./config).
 
 ```yaml
 USAGE:
@@ -15,7 +15,7 @@ OPTIONS:
     -c, --config <config>    Location of configuration file [default: .config/ya/ya.yml]
 
 ARGS:
-    <arguments>...    Optional arguments to pass into run command
+    <arguments>...    Optional arguments to pass into command
 ```
 
 The run command automates action(s) taken to interact with your project.
@@ -90,9 +90,7 @@ $ ya run my friend!
 hello my friend!
 ```
 
-### Complexity
-
-Adjust the complexity of your run command according to the complexity of the tasks you need to perform with that configuration file.
+### This Project's Configurations
 
 ```yaml
 config:
@@ -108,8 +106,8 @@ config:
 ```
 
 ```bash
-$ ya run cargo
-hello my friend!
+$ ya run "cargo --version" 
+cargo 1.53.0-nightly (65d57e6f3 2021-04-04)
 ```
 
 At the time of writing, this is the run config of this project.

@@ -61,7 +61,7 @@ enum Ya {
         )]
         no_arguments: bool,
         #[structopt(
-            help = "Optional arguments to pass into run command"
+            help = "Optional arguments to pass into command"
         )]
         arguments: Vec<String>,
     },
@@ -82,7 +82,7 @@ enum Ya {
         )]
         no_arguments: bool,
         #[structopt(
-            help = "Optional arguments to pass into run command"
+            help = "Optional arguments to pass into command"
         )]
         arguments: Vec<String>,
     },
