@@ -13,3 +13,7 @@ serde_derive = "1.0.117"
 serde_yaml   = "0.8.13"
 log = "0.4.14"
 handlebars = "3.5.4"
+
+[dev-dependencies]
+assert_cmd = "1.0.3"
+anyhow = "1.0.38"
