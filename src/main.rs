@@ -1,5 +1,3 @@
-#![deny(unused_crate_dependencies)]
-
 mod configs;
 mod handlers;
 mod ya;
@@ -26,12 +24,8 @@ enum Ya {
             default_value = ".config/ya/ya.yml"
         )]
         config: String,
-        #[structopt(
-            short,
-            long,
-            help = "Name of this project",
-        )]
-        name: Option<String>
+        #[structopt(short, long, help = "Name of this project")]
+        name: Option<String>,
     },
     #[structopt(name = "config", about = "Print out the ya file")]
     Config {
@@ -54,15 +48,9 @@ enum Ya {
             default_value = ".config/ya/ya.yml"
         )]
         config: PathBuf,
-        #[structopt(
-            short,
-            long,
-            help = "Don't parse arguments e.g. $@"
-        )]
+        #[structopt(short, long, help = "Don't parse arguments e.g. $@")]
         no_arguments: bool,
-        #[structopt(
-            help = "Optional arguments to pass into command"
-        )]
+        #[structopt(help = "Optional arguments to pass into command")]
         arguments: Vec<String>,
     },
     #[structopt(name = "run", about = "Runs a command according to ya configuration")]
@@ -75,15 +63,9 @@ enum Ya {
             default_value = ".config/ya/ya.yml"
         )]
         config: PathBuf,
-        #[structopt(
-            short,
-            long,
-            help = "Don't parse arguments e.g. $@"
-        )]
+        #[structopt(short, long, help = "Don't parse arguments e.g. $@")]
         no_arguments: bool,
-        #[structopt(
-            help = "Optional arguments to pass into command"
-        )]
+        #[structopt(help = "Optional arguments to pass into command")]
         arguments: Vec<String>,
     },
     #[structopt(name = "shell", about = "Starts a shell according to ya configuration")]
@@ -111,17 +93,27 @@ fn main() -> std::io::Result<()> {
                 .expect("config path is not a valid UTF-8 sequence");
             handle_config(config_str).expect("failed to handle configuration command correctly");
         }
-        Ya::Build { config, arguments, no_arguments } => {
+        Ya::Build {
+            config,
+            arguments,
+            no_arguments,
+        } => {
             let config_str = config
                 .to_str()
                 .expect("config path is not a valid UTF-8 sequence");
-            handle_build(config_str, &arguments, no_arguments).expect("failed to handle build command correctly");
+            handle_build(config_str, &arguments, no_arguments)
+                .expect("failed to handle build command correctly");
         }
-        Ya::Run { config, arguments, no_arguments } => {
+        Ya::Run {
+            config,
+            arguments,
+            no_arguments,
+        } => {
             let config_str = config
                 .to_str()
                 .expect("config path is not a valid UTF-8 sequence");
-            handle_run(config_str, &arguments, no_arguments).expect("failed to handle run command correctly");
+            handle_run(config_str, &arguments, no_arguments)
+                .expect("failed to handle run command correctly");
         }
         Ya::Shell { config } => {
             let config_str = config
