@@ -1,12 +1,20 @@
 use serde_yaml::Value;
 
-use std::process::{Command};
+use std::process::Command;
 
-use crate::config::{ParsedCommand, parse_cmd};
+use crate::config::{parse_cmd, ParsedCommand};
 
-pub fn run_command_from_config(config: &Value, command_name: String, sd: Vec<String>, quiet: bool) -> anyhow::Result<()> {
+pub fn run_command_from_config(
+    config: &Value,
+    command_name: String,
+    sd: Vec<String>,
+    quiet: bool,
+) -> anyhow::Result<()> {
     let command_name = command_name.as_str();
-    let cmd = config.get(command_name).ok_or(anyhow::anyhow!("Command {} not found in config", command_name))?;
+    let cmd = config.get(command_name).ok_or(anyhow::anyhow!(
+        "Command {} not found in config",
+        command_name
+    ))?;
     run_command(config, cmd, sd, quiet)
 }
 
@@ -40,11 +48,7 @@ fn run_command(config: &Value, cmd: &Value, sd: Vec<String>, quiet: bool) -> any
         }
     }
 
-    Command::new(prog)
-        .args(args)
-        .arg(cmd)
-        .spawn()?
-        .wait()?;
+    Command::new(prog).args(args).arg(cmd).spawn()?.wait()?;
 
     if !quiet {
         if let Some(msg) = post_msg {
