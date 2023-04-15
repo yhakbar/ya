@@ -10,3 +10,7 @@ anyhow = "1.0.70"
 clap = { version = "4.2.2", features = ["derive"] }
 serde_derive = "1.0.160"
 serde_yaml = "0.9.21"
+
+[dev-dependencies]
+assert_cmd = "2.0.11"
+
