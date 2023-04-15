@@ -14,7 +14,7 @@ use validate::{validate_sd, validate_config_file};
 
 /// Automation tool for lazy people.
 #[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
+#[command(author, version, about, long_about = None, arg_required_else_help(true))]
 struct Args {
     /// Suppress the output of `pre_msg` and `post_msg`.
     #[arg(short, long, default_value_t = false)]
