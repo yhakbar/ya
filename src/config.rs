@@ -24,8 +24,8 @@ pub fn parse_cmd(cmd: &Value) -> anyhow::Result<ParsedCommand> {
     const DEFAULT_PROG_VALUE: &str = "bash";
     const DEFAULT_ARGS_VALUE: &[&str] = &["-c"];
 
-    let default_prog: &Value = &Value::String(DEFAULT_PROG_VALUE.to_string());
-    let default_args: &Value = &Value::Sequence(
+    let default_prog: Value = Value::String(DEFAULT_PROG_VALUE.to_string());
+    let default_args: Value = Value::Sequence(
         DEFAULT_ARGS_VALUE
             .iter()
             .map(|s| Value::String(s.to_string()))
@@ -43,17 +43,18 @@ pub fn parse_cmd(cmd: &Value) -> anyhow::Result<ParsedCommand> {
             post_cmds: None,
         }),
         Value::Mapping(m) => {
-            let prog = m.get("prog").unwrap_or(default_prog);
-            let prog = prog
-                .as_str()
+            let config_prog = m.get("prog");
+
+            let args_if_empty = match config_prog {
+                Some(_) => Value::Sequence(vec![]),
+                None => default_args,
+            };
+
+            let prog = config_prog.unwrap_or(&default_prog).as_str()
                 .ok_or(anyhow::anyhow!("Invalid Config: `prog` is not a string"))?;
 
-            let args = m.get("args").unwrap_or(default_args);
-            let args = args
-                .as_sequence()
-                .ok_or(anyhow::anyhow!("Invalid Config: `args` is not a sequence"))?;
-            let args = args
-                .iter()
+            let args = m.get("args").unwrap_or(&args_if_empty).as_sequence()
+                .ok_or(anyhow::anyhow!("Invalid Config: `args` is not a sequence"))?.iter()
                 .map(|a| {
                     a.as_str()
                         .ok_or(anyhow::anyhow!("Invalid Config: `arg` is not a string: {:?}", a))

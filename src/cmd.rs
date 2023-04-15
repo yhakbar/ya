@@ -7,18 +7,19 @@ use crate::config::{parse_cmd, ParsedCommand};
 pub fn run_command_from_config(
     config: &Value,
     command_name: String,
-    sd: Vec<String>,
+    sd: &[String],
     quiet: bool,
+    extra_args: &[String],
 ) -> anyhow::Result<()> {
     let command_name = command_name.as_str();
     let cmd = config.get(command_name).ok_or(anyhow::anyhow!(
         "Command {} not found in config",
         command_name
     ))?;
-    run_command(config, cmd, sd, quiet)
+    run_command(config, cmd, sd, quiet, extra_args)
 }
 
-fn run_command(config: &Value, cmd: &Value, sd: Vec<String>, quiet: bool) -> anyhow::Result<()> {
+fn run_command(config: &Value, cmd: &Value, sd: &[String], quiet: bool, extra_args: &[String]) -> anyhow::Result<()> {
     let command = parse_cmd(cmd)?;
 
     let ParsedCommand {
@@ -33,7 +34,7 @@ fn run_command(config: &Value, cmd: &Value, sd: Vec<String>, quiet: bool) -> any
 
     if let Some(pre_cmds) = pre_cmds {
         for cmd in pre_cmds {
-            run_command_from_config(config, cmd, sd.clone(), quiet)?;
+            run_command_from_config(config, cmd, sd, quiet, extra_args)?;
         }
     }
 
@@ -48,7 +49,7 @@ fn run_command(config: &Value, cmd: &Value, sd: Vec<String>, quiet: bool) -> any
         }
     }
 
-    Command::new(prog).args(args).arg(cmd).spawn()?.wait()?;
+    Command::new(prog).args(args).arg(cmd).args(extra_args).spawn()?.wait()?;
 
     if !quiet {
         if let Some(msg) = post_msg {
@@ -58,7 +59,7 @@ fn run_command(config: &Value, cmd: &Value, sd: Vec<String>, quiet: bool) -> any
 
     if let Some(post_cmds) = post_cmds {
         for cmd in post_cmds {
-            run_command_from_config(config, cmd, sd.clone(), quiet)?;
+            run_command_from_config(config, cmd, sd, quiet, extra_args)?;
         }
     }
 

@@ -36,6 +36,10 @@ struct Args {
     /// The command in the config to use.
     #[arg()]
     command: Option<String>,
+
+    /// The extra arguments to pass to the command
+    #[arg(allow_hyphen_values = true, trailing_var_arg = true)]
+    extra_args: Vec<String>,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -53,7 +57,7 @@ fn main() -> anyhow::Result<()> {
     let config = parse_config_from_file(&args.config)?;
 
     if let Some(command_name) = args.command {
-        run_command_from_config(&config, command_name, args.sd, args.quiet)?
+        run_command_from_config(&config, command_name, args.sd.as_slice(), args.quiet, args.extra_args.as_slice())?
     }
 
     Ok(())
