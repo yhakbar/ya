@@ -5,5 +5,5 @@ docker_shell:
 
 docker_script:
   prog: docker
-  args: ["run", "-it", "--rm", "ubuntu", "bash", "-c"]
+  args: ["run", "-t", "--rm", "ubuntu", "bash", "-c"]
   cmd: echo "This is running in a docker container!"
