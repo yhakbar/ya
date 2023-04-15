@@ -34,7 +34,7 @@ fn run_command(config: &Value, cmd: &Value, sd: &[String], quiet: bool, extra_ar
 
     if let Some(pre_cmds) = pre_cmds {
         for cmd in pre_cmds {
-            run_command_from_config(config, cmd, sd, quiet, extra_args)?;
+            run_command_from_config(config, cmd, sd, quiet, &[])?;
         }
     }
 
@@ -59,7 +59,7 @@ fn run_command(config: &Value, cmd: &Value, sd: &[String], quiet: bool, extra_ar
 
     if let Some(post_cmds) = post_cmds {
         for cmd in post_cmds {
-            run_command_from_config(config, cmd, sd, quiet, extra_args)?;
+            run_command_from_config(config, cmd, sd, quiet, &[])?;
         }
     }
 
