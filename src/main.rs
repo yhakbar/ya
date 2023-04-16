@@ -2,14 +2,12 @@ use clap::Parser;
 
 use std::path::PathBuf;
 
-const DEFAULT_CONFIG_PATH: &str = ".config/ya.yml";
-
 mod cmd;
 mod config;
 mod validate;
 
 use cmd::run_command_from_config;
-use config::parse_config_from_file;
+use config::{parse_config_from_file, print_config_from_file, get_config_path};
 use validate::{validate_config_file, validate_sd};
 
 /// Automation tool for lazy people.
@@ -21,8 +19,8 @@ struct Args {
     quiet: bool,
 
     /// The config file to use.
-    #[arg(short, long, default_value = DEFAULT_CONFIG_PATH)]
-    config: PathBuf,
+    #[arg(short, long)]
+    config: Option<PathBuf>,
 
     /// Print the config file before running the command.
     #[arg(short, long, default_value_t = false)]
@@ -47,14 +45,15 @@ fn main() -> anyhow::Result<()> {
 
     validate_sd(&args.sd)?;
 
+    let config_path = get_config_path(&args.config)?;
+
     if args.print {
-        let config = parse_config_from_file(&args.config)?;
-        println!("---\n{}---\n", serde_yaml::to_string(&config)?);
+        print_config_from_file(&config_path)?;
     }
 
-    validate_config_file(&args.config)?;
+    validate_config_file(&config_path)?;
 
-    let config = parse_config_from_file(&args.config)?;
+    let config = parse_config_from_file(&config_path)?;
 
     if let Some(command_name) = args.command {
         run_command_from_config(

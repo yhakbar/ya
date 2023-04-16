@@ -2,12 +2,45 @@ use serde_yaml::Value;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
+use std::path::PathBuf;
+
+const DEFAULT_CONFIG_PATHS: [&str; 4] = [
+    ".config/ya.yml",
+    ".config/ya.yaml",
+    "ya.yml",
+    "ya.yaml",
+];
+
+pub fn get_config_path(path: &Option<PathBuf>) -> anyhow::Result<PathBuf> {
+    let path = match path {
+        Some(path) => path,
+        None => {
+            for config_path in DEFAULT_CONFIG_PATHS.iter() {
+                let path = Path::new(config_path);
+                if path.exists() && path.is_file() {
+                    return Ok(path.to_path_buf());
+                }
+            }
+
+            return Err(anyhow::anyhow!(
+                "Could not find config file in default locations. Please specify a config file."
+            ));
+        }
+    };
+    Ok(path.to_path_buf())
+}
 
 pub fn parse_config_from_file(path: &Path) -> anyhow::Result<Value> {
     let f = File::open(path)?;
     let r = BufReader::new(f);
     let ya = serde_yaml::from_reader(r)?;
     Ok(ya)
+}
+
+pub fn print_config_from_file(path: &Path) -> anyhow::Result<()> {
+    let config = parse_config_from_file(path)?;
+    println!("---\n{}---\n", serde_yaml::to_string(&config)?);
+    Ok(())
 }
 
 pub struct ParsedCommand {

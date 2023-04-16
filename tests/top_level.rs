@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod basic {
+mod top_level {
     use anyhow::Result;
     use assert_cmd::Command;
     fn ya() -> Command {
@@ -7,12 +7,12 @@ mod basic {
     }
 
     #[test]
-    fn basic() -> Result<()> {
+    fn top_level() -> Result<()> {
         ya().args(["run"])
-            .current_dir("examples/basic")
+            .current_dir("examples/top-level")
             .assert()
             .success()
-            .stdout("Hey ya!\n");
+            .stdout("This file is not in a .config directory!\n");
 
         Ok(())
     }
