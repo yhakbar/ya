@@ -9,6 +9,8 @@ lint:
 test:
   prog: cargo
   args: ["test", "--all-targets", "--all-features"]
+  pre_cmds:
+    - lint
 
 format:
   prog: cargo
