@@ -67,6 +67,10 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
+      - name: Setup Target
+        if: ${{ ! matrix.use-cross }}
+        run: rustup target add ${{ matrix.target }}
+
       - name: Cargo Build
         if: ${{ ! matrix.use-cross }}
         run: cargo build --locked --release --target ${{ matrix.target }}
