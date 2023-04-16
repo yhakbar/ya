@@ -85,8 +85,11 @@ jobs:
         if: matrix.use-cross
         run: cross build --locked --release --target ${{ matrix.target }}
 
+      - name: Rename binary
+        run: mv target/${{ matrix.target }}/release/ya ya-${{ matrix.target }}
+
       - name: Upload binary
         uses: actions/upload-artifact@v3
         with:
-          name: target-${{ matrix.target }}
-          path: target/${{ matrix.target }}/release/ya
+          name: ${{ matrix.target }}
+          path: ya-${{ matrix.target }}
