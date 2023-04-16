@@ -1,0 +1,25 @@
+name: Tag
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build:
+    name: Build
+    uses: ./.github/workflows/build.yml
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: assets
+
+      - name: Create Release
+        run: gh release create ${GITHUB_REF#refs/tags/} assets/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
