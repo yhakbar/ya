@@ -15,12 +15,15 @@ jobs:
     needs: [build]
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
           path: assets
 
       - name: Create Release
-        run: gh release create ${GITHUB_REF#refs/tags/} assets/*
+        run: gh release create --generate-notes ${GITHUB_REF#refs/tags/} assets/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
