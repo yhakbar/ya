@@ -19,7 +19,13 @@ pub fn run_command_from_config(
     run_command(config, cmd, sd, quiet, extra_args)
 }
 
-fn run_command(config: &Value, cmd: &Value, sd: &[String], quiet: bool, extra_args: &[String]) -> anyhow::Result<()> {
+fn run_command(
+    config: &Value,
+    cmd: &Value,
+    sd: &[String],
+    quiet: bool,
+    extra_args: &[String],
+) -> anyhow::Result<()> {
     let command = parse_cmd(cmd)?;
 
     let ParsedCommand {
@@ -38,18 +44,34 @@ fn run_command(config: &Value, cmd: &Value, sd: &[String], quiet: bool, extra_ar
         }
     }
 
-    let cmd = sd.iter().fold(cmd, |cmd, s| {
-        let (key, value) = s.split_once('=').unwrap();
-        cmd.replace(key, value)
-    });
-
     if !quiet {
         if let Some(msg) = pre_msg {
             println!("{}", msg);
         }
     }
 
-    Command::new(prog).args(args).arg(cmd).args(extra_args).spawn()?.wait()?;
+    match cmd {
+        None => {
+            Command::new(prog)
+                .args(args)
+                .args(extra_args)
+                .spawn()?
+                .wait()?;
+        }
+        Some(cmd) => {
+            let cmd = sd.iter().fold(cmd, |cmd, s| {
+                let (key, value) = s.split_once('=').unwrap();
+                cmd.replace(key, value)
+            });
+
+            Command::new(prog)
+                .args(args)
+                .arg(cmd)
+                .args(extra_args)
+                .spawn()?
+                .wait()?;
+        }
+    }
 
     if !quiet {
         if let Some(msg) = post_msg {

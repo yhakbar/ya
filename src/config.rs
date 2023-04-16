@@ -13,7 +13,7 @@ pub fn parse_config_from_file(path: &Path) -> anyhow::Result<Value> {
 pub struct ParsedCommand {
     pub prog: String,
     pub args: Vec<String>,
-    pub cmd: String,
+    pub cmd: Option<String>,
     pub pre_msg: Option<String>,
     pub post_msg: Option<String>,
     pub pre_cmds: Option<Vec<String>>,
@@ -36,7 +36,7 @@ pub fn parse_cmd(cmd: &Value) -> anyhow::Result<ParsedCommand> {
         Value::String(s) => Ok(ParsedCommand {
             prog: DEFAULT_PROG_VALUE.to_string(),
             args: DEFAULT_ARGS_VALUE.iter().map(|s| s.to_string()).collect(),
-            cmd: s.to_string(),
+            cmd: Some(s.to_string()),
             pre_msg: None,
             post_msg: None,
             pre_cmds: None,
@@ -50,46 +50,68 @@ pub fn parse_cmd(cmd: &Value) -> anyhow::Result<ParsedCommand> {
                 None => default_args,
             };
 
-            let prog = config_prog.unwrap_or(&default_prog).as_str()
+            let prog = config_prog
+                .unwrap_or(&default_prog)
+                .as_str()
                 .ok_or(anyhow::anyhow!("Invalid Config: `prog` is not a string"))?;
 
-            let args = m.get("args").unwrap_or(&args_if_empty).as_sequence()
-                .ok_or(anyhow::anyhow!("Invalid Config: `args` is not a sequence"))?.iter()
+            let args = m
+                .get("args")
+                .unwrap_or(&args_if_empty)
+                .as_sequence()
+                .ok_or(anyhow::anyhow!("Invalid Config: `args` is not a sequence"))?
+                .iter()
                 .map(|a| {
                     a.as_str()
-                        .ok_or(anyhow::anyhow!("Invalid Config: `arg` is not a string: {:?}", a))
+                        .ok_or(anyhow::anyhow!(
+                            "Invalid Config: `arg` is not a string: {:?}",
+                            a
+                        ))
                         .map(|s| s.to_string())
                 })
                 .collect::<anyhow::Result<Vec<String>>>()?;
 
             let cmd = m
                 .get("cmd")
-                .ok_or(anyhow::anyhow!("Invalid Config: No `cmd` in config"))?;
-            let cmd = cmd.as_str().ok_or(anyhow::anyhow!("Invalid Config: `cmd` is not a string"))?;
+                .map(|v| {
+                    v.as_str()
+                        .ok_or(anyhow::anyhow!("Invalid Config: `cmd` is not a string"))
+                })
+                .transpose()?;
 
             let pre_msg = m
                 .get("pre_msg")
-                .map(|v| v.as_str().ok_or(anyhow::anyhow!("Invalid Config: `pre_msg` is not a string")))
+                .map(|v| {
+                    v.as_str()
+                        .ok_or(anyhow::anyhow!("Invalid Config: `pre_msg` is not a string"))
+                })
                 .transpose()?;
             let post_msg = m
                 .get("post_msg")
                 .map(|v| {
-                    v.as_str()
-                        .ok_or(anyhow::anyhow!("Invalid Config: `post_msg` is not a string"))
+                    v.as_str().ok_or(anyhow::anyhow!(
+                        "Invalid Config: `post_msg` is not a string"
+                    ))
                 })
                 .transpose()?;
 
             let pre_cmds = m
                 .get("pre_cmds")
                 .map(|v| {
-                    v.as_sequence()
-                        .ok_or(anyhow::anyhow!("Invalid Config: `pre_cmds` is not a sequence"))
+                    v.as_sequence().ok_or(anyhow::anyhow!(
+                        "Invalid Config: `pre_cmds` is not a sequence"
+                    ))
                 })
                 .transpose()?;
             let pre_cmds = pre_cmds
                 .map(|v| {
                     v.iter()
-                        .map(|v| v.as_str().ok_or(anyhow::anyhow!("Invalid Config: pre_cmd is not a string: {:?}", v)))
+                        .map(|v| {
+                            v.as_str().ok_or(anyhow::anyhow!(
+                                "Invalid Config: pre_cmd is not a string: {:?}",
+                                v
+                            ))
+                        })
                         .collect::<anyhow::Result<Vec<&str>>>()
                         .map(|v| v.iter().map(|s| s.to_string()).collect())
                 })
@@ -98,16 +120,19 @@ pub fn parse_cmd(cmd: &Value) -> anyhow::Result<ParsedCommand> {
             let post_cmds = m
                 .get("post_cmds")
                 .map(|v| {
-                    v.as_sequence()
-                        .ok_or(anyhow::anyhow!("Invalid Config: `post_cmds` is not a sequence"))
+                    v.as_sequence().ok_or(anyhow::anyhow!(
+                        "Invalid Config: `post_cmds` is not a sequence"
+                    ))
                 })
                 .transpose()?;
             let post_cmds = post_cmds
                 .map(|v| {
                     v.iter()
                         .map(|v| {
-                            v.as_str()
-                                .ok_or(anyhow::anyhow!("Invalid Config: `post_cmd` is not a string: {:?}", v))
+                            v.as_str().ok_or(anyhow::anyhow!(
+                                "Invalid Config: `post_cmd` is not a string: {:?}",
+                                v
+                            ))
                         })
                         .collect::<anyhow::Result<Vec<&str>>>()
                         .map(|v| v.iter().map(|s| s.to_string()).collect())
@@ -117,7 +142,7 @@ pub fn parse_cmd(cmd: &Value) -> anyhow::Result<ParsedCommand> {
             Ok(ParsedCommand {
                 prog: prog.to_string(),
                 args,
-                cmd: cmd.to_string(),
+                cmd: cmd.map(|s| s.to_string()),
                 pre_msg: pre_msg.map(|s| s.to_string()),
                 post_msg: post_msg.map(|s| s.to_string()),
                 pre_cmds,

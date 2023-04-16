@@ -57,7 +57,13 @@ fn main() -> anyhow::Result<()> {
     let config = parse_config_from_file(&args.config)?;
 
     if let Some(command_name) = args.command {
-        run_command_from_config(&config, command_name, args.sd.as_slice(), args.quiet, args.extra_args.as_slice())?
+        run_command_from_config(
+            &config,
+            command_name,
+            args.sd.as_slice(),
+            args.quiet,
+            args.extra_args.as_slice(),
+        )?
     }
 
     Ok(())
