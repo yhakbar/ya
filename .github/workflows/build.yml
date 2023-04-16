@@ -68,7 +68,7 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Cargo Build
-        if: ! matrix.use-cross
+        if: ${{ ! matrix.use-cross }}
         run: cargo build --locked --release --target ${{ matrix.target }}
 
       - name: Setup Cross
