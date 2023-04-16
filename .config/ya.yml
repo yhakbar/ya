@@ -1,9 +1,19 @@
-install: cargo install --path .
+install:
+  prog: cargo
+  args: ["install", "--path", "."]
 
-lint: cargo clippy --all-targets --all-features -- -D warnings
+lint:
+  prog: cargo
+  args: ["clippy", "--all-targets", "--all-features", "--", "-D", "warnings"]
 
-test: cargo test --all-targets --all-features
+test:
+  prog: cargo
+  args: ["test", "--all-targets", "--all-features"]
 
-format: cargo fmt --all
+format:
+  prog: cargo
+  args: ["fmt", "--all"]
 
-build: cargo build --release
+build:
+  prog: cargo
+  args: ["build", "--release"]
