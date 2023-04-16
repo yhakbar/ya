@@ -50,13 +50,13 @@ fn run_command(
         }
     }
 
-    match cmd {
+    let result = match cmd {
         None => {
             Command::new(prog)
                 .args(args)
                 .args(extra_args)
                 .spawn()?
-                .wait()?;
+                .wait()?
         }
         Some(cmd) => {
             let cmd = sd.iter().fold(cmd, |cmd, s| {
@@ -69,8 +69,12 @@ fn run_command(
                 .arg(cmd)
                 .args(extra_args)
                 .spawn()?
-                .wait()?;
+                .wait()?
         }
+    };
+
+    if !result.success() {
+        return Err(anyhow::anyhow!("{}", result));
     }
 
     if !quiet {
