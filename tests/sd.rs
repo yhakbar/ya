@@ -17,10 +17,18 @@ mod sd {
     }
     #[test]
     fn sd_with_substitution() -> Result<()> {
-        ya().args(["-c", "examples/sd/.config/ya.yml", "--sd", "<person>=tester" ,"--sd", "<other person>=ya", "sd"])
-            .assert()
-            .success()
-            .stdout("tester loves ya!\n");
+        ya().args([
+            "-c",
+            "examples/sd/.config/ya.yml",
+            "--sd",
+            "<person>=tester",
+            "--sd",
+            "<other person>=ya",
+            "sd",
+        ])
+        .assert()
+        .success()
+        .stdout("tester loves ya!\n");
 
         Ok(())
     }

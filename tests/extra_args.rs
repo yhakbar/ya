@@ -8,10 +8,15 @@ mod extra_args {
 
     #[test]
     fn extra_args() -> Result<()> {
-        ya().args(["-c", "examples/extra-args/.config/ya.yml", "extra", "tester!"])
-            .assert()
-            .success()
-            .stdout("Hello, tester!\n");
+        ya().args([
+            "-c",
+            "examples/extra-args/.config/ya.yml",
+            "extra",
+            "tester!",
+        ])
+        .assert()
+        .success()
+        .stdout("Hello, tester!\n");
 
         Ok(())
     }
