@@ -25,6 +25,10 @@ Options:
 
 `ya` is a tool that automates tasks that you specify using a yaml config file.
 
+## Installation
+
+See the following for installation instructions: [docs/install.md](docs/install.md).
+
 ## Examples
 
 See the following for some example config files: [examples](examples).
