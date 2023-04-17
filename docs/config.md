@@ -40,7 +40,7 @@ You can also specify a config file to use explicitly with the `-c`/`--config` fl
 
 ## Building Your Own Config
 
-Ya does not come with any default commands. You must build your own config file to use it. The config file is a YAML file that contains a mapping of commands to run. The keys are the names of the commands and the values are the commands to run.
+Ya does not come with any default commands. You must build your own config file to use it. The config file is a YAML file that contains a mapping of commands to run. The keys are the names of commands and the values are the commands to run.
 
 Example config files can be found in the [examples](/examples) directory.
 
@@ -59,7 +59,7 @@ It's a single key called `run` with a value of `echo "Hey ya!"`. By default, `ya
 Hey ya!
 ```
 
-This would be equivalent to running:
+Would be equivalent to running:
 
 ```bash
 ❯ bash -c "echo \"Hey ya!\""
@@ -81,7 +81,7 @@ run: |
 
 ### Interactive Commands
 
-You might also want to save a command that you would like to run interactively. For example, you might want to save a command that starts up a Docker container, and allows you to use the interactively use the shell that starts up in that container. You can do that like so:
+You might also want to save a command that you would like to run interactively. For example, you might want to save a command that starts up a Docker container, and connects you to the shell that starts up in that container. You can do that like so:
 
 ```yml
 docker_shell:
@@ -97,7 +97,7 @@ To use this config, you would run a command similar to the previous example:
 root@495b1451aeb5:/#
 ```
 
-This is equivalent to running the following command in a shell:
+This is equivalent to running the following command:
 
 ```bash
 ❯ docker run -it --rm ubuntu
@@ -106,7 +106,7 @@ root@495b1451aeb5:/#
 
 ### Pre and Post Commands
 
-You can also specify commands to run before and/or after the command you specify. For example, you might want to run your linter before you run your tests. You can do that like so:
+You can also specify commands to run before and/or after a given command. For example, you might want to run your linter before you run your tests. You can do that like so:
 
 ```yml
 lint:
@@ -119,6 +119,8 @@ test:
   pre_cmds:
     - lint
 ```
+
+Note that if any command exits with a non-zero exit code, the entire command will exit with a non-zero exit code and exit early. In this example, if your linter fails, your tests will not run.
 
 ### Pre and Post Messages
 

@@ -4,7 +4,7 @@ The usage printed when running `ya` without any arguments or using the `-h`/`--h
 
 ## Print Config
 
-A simple way to determine which config file is being used is to use the `-p`/`--print` flag. This will print the config file to stdout before running any command (or none, if no command is provided).
+A simple way to determine which config file is being used is to use the `-p`/`--print` flag. This will print the config file to stdout before running any command (or if no command is provided).
 
 ```bash
 ❯ ya -p

@@ -35,8 +35,8 @@ See the following for some example config files: [examples](examples).
 
 ## Config
 
-Read the following for more information on the config file: [docs/config.md](docs/config.md).
+Read the following for information on the config file: [docs/config.md](docs/config.md).
 
 ## CLI
 
-Read the following for more information on the CLI: [docs/cli.md](docs/cli.md).
+Read the following for information on the CLI: [docs/cli.md](docs/cli.md).
