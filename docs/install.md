@@ -17,7 +17,7 @@ rtx install ya latest
 ## Homebrew
 
 ```bash
-brew tap yhakbar/homebrew-ya
+brew tap yhakbar/ya
 brew install ya
 ```
 
