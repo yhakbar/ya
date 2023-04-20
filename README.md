@@ -19,6 +19,7 @@ Options:
   -c, --config <CONFIG>  The config file to use
   -p, --print            Print the config file before running the command
       --sd <SD>          Search and displacements to make in the command before running it. Expects a key and value separated by an `=`. e.g. `--sd key=value`
+  -x, --execute          Print the command that will be executed before executing it
   -h, --help             Print help
   -V, --version          Print version
 ```
