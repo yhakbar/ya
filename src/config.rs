@@ -4,12 +4,7 @@ use std::io::BufReader;
 use std::path::Path;
 use std::path::PathBuf;
 
-const DEFAULT_CONFIG_PATHS: [&str; 4] = [
-    ".config/ya.yml",
-    ".config/ya.yaml",
-    "ya.yml",
-    "ya.yaml",
-];
+const DEFAULT_CONFIG_PATHS: [&str; 4] = [".config/ya.yml", ".config/ya.yaml", "ya.yml", "ya.yaml"];
 
 pub fn get_config_path(path: &Option<PathBuf>) -> anyhow::Result<PathBuf> {
     let path = match path {
@@ -43,17 +38,34 @@ pub fn print_config_from_file(path: &Path) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub struct ParsedCommand {
-    pub prog: String,
-    pub args: Vec<String>,
-    pub cmd: Option<String>,
+pub struct ParsedConfig {
+    pub parsed_command: ParsedCommand,
     pub pre_msg: Option<String>,
     pub post_msg: Option<String>,
     pub pre_cmds: Option<Vec<String>>,
     pub post_cmds: Option<Vec<String>>,
 }
 
-pub fn parse_cmd(cmd: &Value) -> anyhow::Result<ParsedCommand> {
+pub struct ParsedCommand {
+    pub prog: String,
+    pub args: Vec<String>,
+    pub cmd: Option<String>,
+}
+
+impl std::fmt::Display for ParsedCommand {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let mut display = self.prog.clone();
+        for arg in self.args.iter() {
+            display.push_str(&format!(" {}", arg));
+        }
+        if let Some(cmd) = &self.cmd {
+            display.push_str(&format!(" '{}'", cmd));
+        }
+        write!(f, "{}", display)
+    }
+}
+
+pub fn parse_cmd(cmd: &Value) -> anyhow::Result<ParsedConfig> {
     const DEFAULT_PROG_VALUE: &str = "bash";
     const DEFAULT_ARGS_VALUE: &[&str] = &["-c"];
 
@@ -66,10 +78,12 @@ pub fn parse_cmd(cmd: &Value) -> anyhow::Result<ParsedCommand> {
     );
 
     match cmd {
-        Value::String(s) => Ok(ParsedCommand {
-            prog: DEFAULT_PROG_VALUE.to_string(),
-            args: DEFAULT_ARGS_VALUE.iter().map(|s| s.to_string()).collect(),
-            cmd: Some(s.to_string()),
+        Value::String(s) => Ok(ParsedConfig {
+            parsed_command: ParsedCommand {
+                prog: DEFAULT_PROG_VALUE.to_string(),
+                args: DEFAULT_ARGS_VALUE.iter().map(|s| s.to_string()).collect(),
+                cmd: Some(s.to_string()),
+            },
             pre_msg: None,
             post_msg: None,
             pre_cmds: None,
@@ -172,10 +186,12 @@ pub fn parse_cmd(cmd: &Value) -> anyhow::Result<ParsedCommand> {
                 })
                 .transpose()?;
 
-            Ok(ParsedCommand {
-                prog: prog.to_string(),
-                args,
-                cmd: cmd.map(|s| s.to_string()),
+            Ok(ParsedConfig {
+                parsed_command: ParsedCommand {
+                    prog: prog.to_string(),
+                    args,
+                    cmd: cmd.map(|s| s.to_string()),
+                },
                 pre_msg: pre_msg.map(|s| s.to_string()),
                 post_msg: post_msg.map(|s| s.to_string()),
                 pre_cmds,

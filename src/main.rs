@@ -31,6 +31,14 @@ struct Args {
     #[arg(long)]
     sd: Vec<String>,
 
+    /// Print the command that will be executed before executing it.
+    #[arg(short = 'x', long, default_value_t = false)]
+    execution: bool,
+
+    /// Don't add color to anything printed to stdout by ya.
+    #[arg(long, default_value_t = false)]
+    no_color: bool,
+
     /// The command in the config to use.
     #[arg()]
     command: Option<String>,
@@ -61,6 +69,8 @@ fn main() -> anyhow::Result<()> {
             command_name,
             args.sd.as_slice(),
             args.quiet,
+            args.execution,
+            args.no_color,
             args.extra_args.as_slice(),
         )?
     }

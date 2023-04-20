@@ -1,14 +1,16 @@
 use serde_yaml::Value;
+use std::{process::Command};
+use colored::Colorize;
 
-use std::process::Command;
-
-use crate::config::{parse_cmd, ParsedCommand};
+use crate::config::{parse_cmd, ParsedConfig, ParsedCommand};
 
 pub fn run_command_from_config(
     config: &Value,
     command_name: String,
     sd: &[String],
     quiet: bool,
+    execution: bool,
+    no_color: bool,
     extra_args: &[String],
 ) -> anyhow::Result<()> {
     let command_name = command_name.as_str();
@@ -16,7 +18,7 @@ pub fn run_command_from_config(
         "Command {} not found in config",
         command_name
     ))?;
-    run_command(config, cmd, sd, quiet, extra_args)
+    run_command(config, cmd, sd, quiet, execution, no_color, extra_args)
 }
 
 fn run_command(
@@ -24,23 +26,31 @@ fn run_command(
     cmd: &Value,
     sd: &[String],
     quiet: bool,
+    execution: bool,
+    no_color: bool,
     extra_args: &[String],
 ) -> anyhow::Result<()> {
     let command = parse_cmd(cmd)?;
 
-    let ParsedCommand {
-        prog,
-        args,
-        cmd,
+    let ParsedConfig {
+        parsed_command,
         pre_msg,
         post_msg,
         pre_cmds,
         post_cmds,
     } = command;
 
+    let ParsedCommand {
+        ref prog,
+        ref args,
+        ref cmd,
+    } = parsed_command;
+
+    let cmd = cmd.clone();
+
     if let Some(pre_cmds) = pre_cmds {
         for cmd in pre_cmds {
-            run_command_from_config(config, cmd, sd, quiet, &[])?;
+            run_command_from_config(config, cmd, sd, quiet, execution, no_color, &[])?;
         }
     }
 
@@ -50,14 +60,20 @@ fn run_command(
         }
     }
 
-    let result = match cmd {
-        None => {
-            Command::new(prog)
-                .args(args)
-                .args(extra_args)
-                .spawn()?
-                .wait()?
+    if execution {
+        let mut parsed_command = format!("$ {}", parsed_command);
+        if ! no_color {
+            parsed_command = parsed_command.blue().bold().to_string();
         }
+        println!("{}", parsed_command);
+    }
+
+    let result = match cmd {
+        None => Command::new(prog)
+            .args(args)
+            .args(extra_args)
+            .spawn()?
+            .wait()?,
         Some(cmd) => {
             let cmd = sd.iter().fold(cmd, |cmd, s| {
                 let (key, value) = s.split_once('=').unwrap();
@@ -74,7 +90,8 @@ fn run_command(
     };
 
     if !result.success() {
-        return Err(anyhow::anyhow!("{}", result));
+        let msg = format!("Command `{}` failed with status {}", parsed_command, result);
+        return Err(anyhow::anyhow!("{}", msg));
     }
 
     if !quiet {
@@ -85,7 +102,7 @@ fn run_command(
 
     if let Some(post_cmds) = post_cmds {
         for cmd in post_cmds {
-            run_command_from_config(config, cmd, sd, quiet, &[])?;
+            run_command_from_config(config, cmd, sd, quiet, execution, no_color, &[])?;
         }
     }
 
