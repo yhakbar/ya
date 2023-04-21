@@ -3,8 +3,11 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 use std::path::PathBuf;
+use home::home_dir;
 
-const DEFAULT_CONFIG_PATHS: [&str; 4] = [".config/ya.yml", ".config/ya.yaml", "ya.yml", "ya.yaml"];
+use crate::git::get_git_root;
+
+const DEFAULT_CONFIG_PATHS: [&str; 4] = ["ya.yml", "ya.yaml", ".config/ya.yml", ".config/ya.yaml"];
 
 pub fn get_config_path(path: &Option<PathBuf>) -> anyhow::Result<PathBuf> {
     let path = match path {
@@ -14,6 +17,26 @@ pub fn get_config_path(path: &Option<PathBuf>) -> anyhow::Result<PathBuf> {
                 let path = Path::new(config_path);
                 if path.exists() && path.is_file() {
                     return Ok(path.to_path_buf());
+                }
+            }
+
+            let git_root = get_git_root();
+            if let Ok(git_root) = git_root {
+                for config_path in DEFAULT_CONFIG_PATHS.iter() {
+                    let path = Path::new(&git_root).join(config_path);
+                    if path.exists() && path.is_file() {
+                        return Ok(path);
+                    }
+                }
+            }
+
+            let home = home_dir();
+            if let Some(home) = home {
+                for config_path in DEFAULT_CONFIG_PATHS.iter() {
+                    let path = Path::new(&home).join(config_path);
+                    if path.exists() && path.is_file() {
+                        return Ok(path);
+                    }
                 }
             }
 
