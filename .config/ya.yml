@@ -1,6 +1,7 @@
 install:
   prog: cargo
   args: ["install", "--path", "."]
+  chdir: $GIT_ROOT
 
 lint:
   prog: cargo

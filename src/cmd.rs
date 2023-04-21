@@ -1,8 +1,8 @@
-use serde_yaml::Value;
-use std::{process::Command};
 use colored::Colorize;
+use serde_yaml::Value;
+use std::process::Command;
 
-use crate::config::{parse_cmd, ParsedConfig, ParsedCommand};
+use crate::config::{parse_cmd, resolve_chdir, ParsedCommand, ParsedConfig};
 
 pub fn run_command_from_config(
     config: &Value,
@@ -38,6 +38,7 @@ fn run_command(
         post_msg,
         pre_cmds,
         post_cmds,
+        chdir,
     } = command;
 
     let ParsedCommand {
@@ -62,7 +63,7 @@ fn run_command(
 
     if execution {
         let mut parsed_command = format!("$ {}", parsed_command);
-        if ! no_color {
+        if !no_color {
             parsed_command = parsed_command.blue().bold().to_string();
         }
         println!("{}", parsed_command);
@@ -81,6 +82,11 @@ fn run_command(
     }
 
     command_builder.args(extra_args);
+
+    if let Some(chdir) = chdir {
+        let chdir = resolve_chdir(chdir)?;
+        command_builder.current_dir(chdir);
+    }
 
     let result = command_builder.spawn()?.wait()?;
 

@@ -15,6 +15,8 @@ command_as_mapping:
 
   pre_msg: Optional String
   post_msg: Optional String
+
+  chdir: Optional String
 ```
 
 - `command_as_string` is a string that will be run as a command. This is equivalent to `command_as_mapping` with `prog` set to `bash`, `args` set to `-c` and `cmd` set to the value.
@@ -26,6 +28,7 @@ command_as_mapping:
   - `post_cmds` is a list of commands found in the config to run after the command.
   - `pre_msg` is a message to print before running the command.
   - `post_msg` is a message to print after running the command.
+  - `chdir` is the directory to change to before running the command.
 
 ## Config File Precedence
 
@@ -158,3 +161,16 @@ Note that you can use the `-q`/`quiet` flag to suppress the output of `pre_msg` 
 ❯ ya -q test_difficult_stuff
 Testing difficult stuff...
 ```
+
+### Chdir
+
+Using the `chdir` key, you can specify a directory to change to before running the command. For example, you might want to always run your tests from the root of your repository. You can do that like so:
+
+```yml
+install:
+  prog: cargo
+  args: ["install", "--path", "."]
+  chdir: $GIT_ROOT
+```
+
+You can also use a `chdir` key that starts with the `$HOME` variable to change to a path relative to your home directory, or use local a relative path.

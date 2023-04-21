@@ -4,11 +4,11 @@ use std::path::PathBuf;
 
 mod cmd;
 mod config;
-mod validate;
 mod git;
+mod validate;
 
 use cmd::run_command_from_config;
-use config::{parse_config_from_file, print_config_from_file, get_config_path};
+use config::{get_config_path, parse_config_from_file, print_config_from_file};
 use validate::{validate_config_file, validate_sd};
 
 /// Automation tool for lazy people.
