@@ -68,26 +68,21 @@ fn run_command(
         println!("{}", parsed_command);
     }
 
-    let result = match cmd {
-        None => Command::new(prog)
-            .args(args)
-            .args(extra_args)
-            .spawn()?
-            .wait()?,
-        Some(cmd) => {
-            let cmd = sd.iter().fold(cmd, |cmd, s| {
-                let (key, value) = s.split_once('=').unwrap();
-                cmd.replace(key, value)
-            });
+    let mut command_builder = Command::new(prog);
 
-            Command::new(prog)
-                .args(args)
-                .arg(cmd)
-                .args(extra_args)
-                .spawn()?
-                .wait()?
-        }
-    };
+    command_builder.args(args);
+
+    if let Some(cmd) = cmd {
+        let cmd = sd.iter().fold(cmd, |cmd, s| {
+            let (key, value) = s.split_once('=').unwrap();
+            cmd.replace(key, value)
+        });
+        command_builder.arg(cmd);
+    }
+
+    command_builder.args(extra_args);
+
+    let result = command_builder.spawn()?.wait()?;
 
     if !result.success() {
         let msg = format!("Command `{}` failed with status {}", parsed_command, result);
