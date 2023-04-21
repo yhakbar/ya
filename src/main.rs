@@ -5,6 +5,7 @@ use std::path::PathBuf;
 mod cmd;
 mod config;
 mod validate;
+mod git;
 
 use cmd::run_command_from_config;
 use config::{parse_config_from_file, print_config_from_file, get_config_path};
