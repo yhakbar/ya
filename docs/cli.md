@@ -63,3 +63,13 @@ sd: echo "<person> loves <other person>!"
 ❯ ya --sd '<person>=ya' --sd '<other person>=you' sd
 ya loves you!
 ```
+
+## Execution
+
+Setting the `-x`/`--execute` flag will print any command that `ya` executes before executing it. This can be useful for debugging configurations.
+
+```bash
+❯ ya -x run
+$ bash -c 'echo "Hey ya!"'
+Hey ya!
+```
