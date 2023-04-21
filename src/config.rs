@@ -1,9 +1,9 @@
+use home::home_dir;
 use serde_yaml::Value;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 use std::path::PathBuf;
-use home::home_dir;
 
 use crate::git::get_git_root;
 
@@ -48,6 +48,28 @@ pub fn get_config_path(path: &Option<PathBuf>) -> anyhow::Result<PathBuf> {
     Ok(path.to_path_buf())
 }
 
+pub fn resolve_chdir(chdir: String) -> anyhow::Result<String> {
+    if chdir.starts_with("$HOME") {
+        let home = home_dir();
+        if let Some(home) = home {
+            let home = home.to_str().unwrap();
+            let chdir = chdir.replace("$HOME", home);
+            return Ok(chdir);
+        }
+    }
+
+    if chdir.starts_with("$GIT_ROOT") {
+        let git_root = get_git_root();
+        if let Ok(git_root) = git_root {
+            let git_root = git_root.trim();
+            let chdir = chdir.replace("$GIT_ROOT", git_root);
+            return Ok(chdir);
+        }
+    }
+
+    Ok(chdir)
+}
+
 pub fn parse_config_from_file(path: &Path) -> anyhow::Result<Value> {
     let f = File::open(path)?;
     let r = BufReader::new(f);
@@ -67,6 +89,7 @@ pub struct ParsedConfig {
     pub post_msg: Option<String>,
     pub pre_cmds: Option<Vec<String>>,
     pub post_cmds: Option<Vec<String>>,
+    pub chdir: Option<String>,
 }
 
 pub struct ParsedCommand {
@@ -111,6 +134,7 @@ pub fn parse_cmd(cmd: &Value) -> anyhow::Result<ParsedConfig> {
             post_msg: None,
             pre_cmds: None,
             post_cmds: None,
+            chdir: None,
         }),
         Value::Mapping(m) => {
             let config_prog = m.get("prog");
@@ -209,6 +233,14 @@ pub fn parse_cmd(cmd: &Value) -> anyhow::Result<ParsedConfig> {
                 })
                 .transpose()?;
 
+            let chdir = m
+                .get("chdir")
+                .map(|v| {
+                    v.as_str()
+                        .ok_or(anyhow::anyhow!("Invalid Config: `chdir` is not a string"))
+                })
+                .transpose()?;
+
             Ok(ParsedConfig {
                 parsed_command: ParsedCommand {
                     prog: prog.to_string(),
@@ -219,6 +251,7 @@ pub fn parse_cmd(cmd: &Value) -> anyhow::Result<ParsedConfig> {
                 post_msg: post_msg.map(|s| s.to_string()),
                 pre_cmds,
                 post_cmds,
+                chdir: chdir.map(|s| s.to_string()),
             })
         }
         _ => Err(anyhow::anyhow!(
