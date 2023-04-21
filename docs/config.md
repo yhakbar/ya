@@ -31,10 +31,12 @@ command_as_mapping:
 
 Ya will look for a config file in the following locations, in order:
 
-- `./.config/ya.yml`
-- `./.config/ya.yaml`
 - `./ya.yml`
 - `./ya.yaml`
+- `./.config/ya.yml`
+- `./.config/ya.yaml`
+
+Note that although you the highest precedence config file is the one in the current directory, I recommend tucking your config file into the `.config` directory. This reduces clutter in your configurations and allows you to quickly override the config file by creating a temporary config in the current directory.
 
 You can also specify a config file to use explicitly with the `-c`/`--config` flag.
 

@@ -4,7 +4,7 @@ use std::io::BufReader;
 use std::path::Path;
 use std::path::PathBuf;
 
-const DEFAULT_CONFIG_PATHS: [&str; 4] = [".config/ya.yml", ".config/ya.yaml", "ya.yml", "ya.yaml"];
+const DEFAULT_CONFIG_PATHS: [&str; 4] = ["ya.yml", "ya.yaml", ".config/ya.yml", ".config/ya.yaml"];
 
 pub fn get_config_path(path: &Option<PathBuf>) -> anyhow::Result<PathBuf> {
     let path = match path {
