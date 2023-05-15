@@ -10,7 +10,7 @@ anyhow = "1.0.71"
 clap = { version = "4.2.7", features = ["derive"] }
 colored = { version = "2.0.0" }
 home = "0.5.5"
-serde_derive = "1.0.162"
+serde_derive = "1.0.163"
 serde_yaml = "0.9.21"
 
 [dev-dependencies]
