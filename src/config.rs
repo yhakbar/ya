@@ -84,7 +84,7 @@ pub fn print_config_from_file(path: &Path) -> anyhow::Result<()> {
 }
 
 pub struct ParsedConfig {
-    pub parsed_command: ParsedCommand,
+    pub parsed_command: CommandType,
     pub pre_msg: Option<String>,
     pub post_msg: Option<String>,
     pub pre_cmds: Option<Vec<String>>,
@@ -92,13 +92,18 @@ pub struct ParsedConfig {
     pub chdir: Option<String>,
 }
 
-pub struct ParsedCommand {
+pub struct FullCommand {
     pub prog: String,
     pub args: Vec<String>,
     pub cmd: Option<String>,
 }
 
-impl std::fmt::Display for ParsedCommand {
+pub enum CommandType {
+    SimpleCommand(String),
+    FullCommand(FullCommand),
+}
+
+impl std::fmt::Display for FullCommand {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let mut display = self.prog.clone();
         for arg in self.args.iter() {
@@ -125,11 +130,7 @@ pub fn parse_cmd(cmd: &Value) -> anyhow::Result<ParsedConfig> {
 
     match cmd {
         Value::String(s) => Ok(ParsedConfig {
-            parsed_command: ParsedCommand {
-                prog: DEFAULT_PROG_VALUE.to_string(),
-                args: DEFAULT_ARGS_VALUE.iter().map(|s| s.to_string()).collect(),
-                cmd: Some(s.to_string()),
-            },
+            parsed_command: CommandType::SimpleCommand(s.to_string()),
             pre_msg: None,
             post_msg: None,
             pre_cmds: None,
@@ -242,11 +243,13 @@ pub fn parse_cmd(cmd: &Value) -> anyhow::Result<ParsedConfig> {
                 .transpose()?;
 
             Ok(ParsedConfig {
-                parsed_command: ParsedCommand {
-                    prog: prog.to_string(),
-                    args,
-                    cmd: cmd.map(|s| s.to_string()),
-                },
+                parsed_command: CommandType::FullCommand(
+                    FullCommand {
+                        prog: prog.to_string(),
+                        args,
+                        cmd: cmd.map(|s| s.to_string()),
+                    }
+                ),
                 pre_msg: pre_msg.map(|s| s.to_string()),
                 post_msg: post_msg.map(|s| s.to_string()),
                 pre_cmds,

@@ -2,7 +2,7 @@ use colored::Colorize;
 use serde_yaml::Value;
 use std::process::Command;
 
-use crate::config::{parse_cmd, resolve_chdir, ParsedCommand, ParsedConfig};
+use crate::config::{parse_cmd, resolve_chdir, FullCommand, ParsedConfig, CommandType};
 
 pub fn run_command_from_config(
     config: &Value,
@@ -41,11 +41,20 @@ fn run_command(
         chdir,
     } = command;
 
-    let ParsedCommand {
+    let full_command = match parsed_command {
+        CommandType::SimpleCommand(cmd) => FullCommand {
+            prog: "bash".to_string(),
+            args: vec!["-c".to_string()],
+            cmd: Some(cmd),
+        },
+        CommandType::FullCommand(cmd) => cmd,
+    };
+
+    let FullCommand {
         ref prog,
         ref args,
         ref cmd,
-    } = parsed_command;
+    } = full_command;
 
     let cmd = cmd.clone();
 
@@ -62,7 +71,7 @@ fn run_command(
     }
 
     if execution {
-        let mut parsed_command = format!("$ {}", parsed_command);
+        let mut parsed_command = format!("$ {}", full_command);
         if !no_color {
             parsed_command = parsed_command.blue().bold().to_string();
         }
@@ -91,7 +100,7 @@ fn run_command(
     let result = command_builder.spawn()?.wait()?;
 
     if !result.success() {
-        let msg = format!("Command `{}` failed with status {}", parsed_command, result);
+        let msg = format!("Command `{}` failed with status {}", full_command, result);
         return Err(anyhow::anyhow!("{}", msg));
     }
 
