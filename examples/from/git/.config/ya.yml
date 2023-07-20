@@ -1,0 +1,2 @@
+run:
+  from: $GIT_ROOT/examples/from/.config/ya.yml

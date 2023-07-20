@@ -7,7 +7,7 @@ mod config;
 mod git;
 mod validate;
 
-use cmd::run_command_from_config;
+use cmd::{run_command_from_config, RunCommandFlags};
 use config::{get_config_path, parse_config_from_file, print_config_from_file};
 use validate::{validate_config_file, validate_sd};
 
@@ -68,10 +68,12 @@ fn main() -> anyhow::Result<()> {
         run_command_from_config(
             &config,
             command_name,
-            args.sd.as_slice(),
-            args.quiet,
-            args.execution,
-            args.no_color,
+            &RunCommandFlags {
+                sd: args.sd,
+                quiet: args.quiet,
+                execution: args.execution,
+                no_color: args.no_color,
+            },
             args.extra_args.as_slice(),
         )?
     }

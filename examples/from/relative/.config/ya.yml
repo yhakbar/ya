@@ -1,0 +1,2 @@
+run:
+  from: ../.config/ya.yml
