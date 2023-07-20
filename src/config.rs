@@ -90,6 +90,7 @@ pub struct ParsedConfig {
     pub pre_cmds: Option<Vec<String>>,
     pub post_cmds: Option<Vec<String>>,
     pub chdir: Option<String>,
+    pub from: Option<String>,
 }
 
 pub struct FullCommand {
@@ -101,6 +102,7 @@ pub struct FullCommand {
 pub enum CommandType {
     SimpleCommand(String),
     FullCommand(FullCommand),
+    None,
 }
 
 impl std::fmt::Display for FullCommand {
@@ -136,6 +138,7 @@ pub fn parse_cmd(cmd: &Value) -> anyhow::Result<ParsedConfig> {
             pre_cmds: None,
             post_cmds: None,
             chdir: None,
+            from: None,
         }),
         Value::Mapping(m) => {
             let config_prog = m.get("prog");
@@ -242,6 +245,26 @@ pub fn parse_cmd(cmd: &Value) -> anyhow::Result<ParsedConfig> {
                 })
                 .transpose()?;
 
+            let from = m
+                .get("from")
+                .map(|v| {
+                    v.as_str()
+                        .ok_or(anyhow::anyhow!("Invalid Config: `from` is not a string"))
+                })
+                .transpose()?;
+
+            if let Some(from) = from {
+                return Ok(ParsedConfig {
+                    parsed_command: CommandType::None,
+                    pre_msg: None,
+                    post_msg: None,
+                    pre_cmds: None,
+                    post_cmds: None,
+                    chdir: None,
+                    from: Some(from.to_string()),
+                });
+            }
+
             Ok(ParsedConfig {
                 parsed_command: CommandType::FullCommand(
                     FullCommand {
@@ -255,6 +278,7 @@ pub fn parse_cmd(cmd: &Value) -> anyhow::Result<ParsedConfig> {
                 pre_cmds,
                 post_cmds,
                 chdir: chdir.map(|s| s.to_string()),
+                from: from.map(|s| s.to_string()),
             })
         }
         _ => Err(anyhow::anyhow!(

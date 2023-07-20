@@ -17,6 +17,7 @@ command_as_mapping:
   post_msg: Optional String
 
   chdir: Optional String
+  from: Optional String
 ```
 
 - `command_as_string` is a string that will be run as a command. This is equivalent to `command_as_mapping` with `prog` set to `bash`, `args` set to `-c` and `cmd` set to the value.
@@ -29,6 +30,7 @@ command_as_mapping:
   - `pre_msg` is a message to print before running the command.
   - `post_msg` is a message to print after running the command.
   - `chdir` is the directory to change to before running the command.
+  - `from` is a configuration file to use instead of the current one for a given command.
 
 ## Config File Precedence
 
@@ -174,3 +176,25 @@ install:
 ```
 
 The value of `chdir` can be any valid path. It can be an absolute path, a relative path, or a path relative to the root of the git repository that the current directory is in. You can use the `$GIT_ROOT` variable to refer to the root of the git repository that the current directory is in and the `$HOME` variable to refer to the home directory of the current user.
+
+### From
+
+Using the `from` key, you can specify a configuration file to use for a command instead of the current one. For example, you might want to have a central config file that defines standard commands used throughout a monorepo and referenced in subdirectories. You can do that like so:
+
+```yml
+# .config/ya.yml
+lint:
+  prog: cargo
+  args: ["clippy", "--all-targets", "--all-features", "--", "-D", "warnings"]
+```
+
+```yml
+# subdirectory/.config/ya.yml
+lint:
+  from: $GIT_ROOT/.config/ya.yml
+```
+
+```bash
+# Within the subdirectory
+❯ ya lint
+```
