@@ -11,7 +11,7 @@ clap = { version = "4.3.12", features = ["derive"] }
 colored = { version = "2.0.4" }
 home = "0.5.5"
 serde_derive = "1.0.171"
-serde_yaml = "0.9.23"
+serde_yaml = "0.9.25"
 
 [dev-dependencies]
 assert_cmd = "2.0.12"
