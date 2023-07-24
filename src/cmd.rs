@@ -161,8 +161,7 @@ fn run_command(
     let result = command_builder.spawn()?.wait()?;
 
     if !result.success() {
-        let msg = format!("Command `{}` failed with status {}", full_command, result);
-        return Err(anyhow::anyhow!("{}", msg));
+        std::process::exit(result.code().unwrap_or(1));
     }
 
     if !run_command_flags.quiet {
