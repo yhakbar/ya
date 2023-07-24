@@ -129,8 +129,20 @@ fn run_command(
         }
     }
 
+    let mut final_args = args.clone().to_vec();
+
+    if let Some(cmd) = cmd {
+        let cmd = run_command_flags.sd.iter().fold(cmd, |cmd, s| {
+            let (key, value) = s.split_once('=').unwrap();
+            cmd.replace(key, value)
+        });
+        final_args.push(cmd);
+    }
+
+    final_args.extend_from_slice(extra_args);
+
     if run_command_flags.execution {
-        let mut parsed_command = format!("$ {}", full_command);
+        let mut parsed_command = format!("$ {} {}", prog, final_args.join(" "));
         if !run_command_flags.no_color {
             parsed_command = parsed_command.blue().bold().to_string();
         }
@@ -139,17 +151,7 @@ fn run_command(
 
     let mut command_builder = Command::new(prog);
 
-    command_builder.args(args);
-
-    if let Some(cmd) = cmd {
-        let cmd = run_command_flags.sd.iter().fold(cmd, |cmd, s| {
-            let (key, value) = s.split_once('=').unwrap();
-            cmd.replace(key, value)
-        });
-        command_builder.arg(cmd);
-    }
-
-    command_builder.args(extra_args);
+    command_builder.args(final_args);
 
     if let Some(chdir) = chdir {
         let chdir = resolve_chdir(chdir)?;
