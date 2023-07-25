@@ -8,76 +8,29 @@ const FROM_RECURSION_LIMIT: u64 = 10;
 
 pub fn run_command_from_config(
     config: &Value,
-    command_name: String,
+    command_name: &str,
     run_command_flags: &RunCommandFlags,
     extra_args: &[String],
+    recursion_depth: u64,
 ) -> anyhow::Result<()> {
-    let command_name = command_name.as_str();
+    let command_name = command_name;
     let cmd = config.get(command_name).ok_or(anyhow::anyhow!(
         "Command {} not found in config",
         command_name
     ))?;
-    run_command(config, command_name, cmd, run_command_flags, extra_args)
+    run_command(config, command_name, cmd, run_command_flags, extra_args, recursion_depth)
 }
 
 
-fn get_full_command_from_parsed_command(parsed_command: CommandType, from: Option<String>, command_name: &str, recursion_depth: u64) -> Result<FullCommand, anyhow::Error> {
+fn get_full_command_from_parsed_command(parsed_command: CommandType) -> Option<FullCommand> {
     match parsed_command {
-        CommandType::SimpleCommand(cmd) => Ok(FullCommand {
+        CommandType::SimpleCommand(cmd) => Some(FullCommand {
             prog: "bash".to_string(),
             args: vec!["-c".to_string()],
             cmd: Some(cmd),
         }),
-        CommandType::FullCommand(cmd) => Ok(cmd),
-        CommandType::None => {
-            if let Some(from) = from {
-                let from = resolve_chdir(from)?;
-                let from_path_buff = PathBuf::from(&from);
-                let from_config = parse_config_from_file(from_path_buff.as_path())?;
-
-                let parsed_cmd = from_config.get(command_name);
-
-                if let Some(parsed_cmd) = parsed_cmd {
-                    let from_command = parse_cmd(parsed_cmd)?;
-
-                    let ParsedConfig {
-                        parsed_command,
-                        pre_msg: _,
-                        post_msg: _,
-                        pre_cmds: _,
-                        post_cmds: _,
-                        chdir: _,
-                        from: _,
-                    } = from_command;
-
-                    return match parsed_command {
-                        CommandType::SimpleCommand(cmd) => Ok(FullCommand {
-                            prog: "bash".to_string(),
-                            args: vec!["-c".to_string()],
-                            cmd: Some(cmd),
-                        }),
-                        CommandType::FullCommand(cmd) => Ok(cmd),
-                        CommandType::None => {
-                            if (recursion_depth) >= FROM_RECURSION_LIMIT {
-                                return Err(anyhow::anyhow!(
-                                    "Recursion limit of `from` reached: {}",
-                                    FROM_RECURSION_LIMIT
-                                ))
-                            }
-
-                            return get_full_command_from_parsed_command(parsed_command, Some(from), command_name, recursion_depth + 1)
-                        }
-                    }
-                } else {
-                    return Err(anyhow::anyhow!(
-                        "Command `{}` not found in config specified by `from` field of file {}",
-                        command_name,
-                        &from,
-                    ))
-                }
-            }
-            Err(anyhow::anyhow!("You must provide one of: a string representing a command, a fully qualified command, or a `from` field"))
-        }
+        CommandType::FullCommand(cmd) => Some(cmd),
+        CommandType::None => None,
     }
 }
 
@@ -94,7 +47,15 @@ fn run_command(
     cmd: &Value,
     run_command_flags: &RunCommandFlags,
     extra_args: &[String],
+    recursion_depth: u64,
 ) -> anyhow::Result<()> {
+    if (recursion_depth) >= FROM_RECURSION_LIMIT {
+        return Err(anyhow::anyhow!(
+            "Recursive command calls reached: {}",
+            FROM_RECURSION_LIMIT
+        ))
+    }
+
     let command = parse_cmd(cmd)?;
 
     let ParsedConfig {
@@ -107,7 +68,23 @@ fn run_command(
         from,
     } = command;
 
-    let full_command = get_full_command_from_parsed_command(parsed_command, from, command_name, 0)?;
+    let full_command_option = get_full_command_from_parsed_command(parsed_command);
+
+    let full_command;
+
+    if let Some(full_command_option) = full_command_option {
+        full_command = full_command_option;
+    } else if let Some(from) = from {
+        let from = resolve_chdir(from)?;
+        let from_path_buff = PathBuf::from(&from);
+        let from_config = parse_config_from_file(from_path_buff.as_path())?;
+
+        run_command_from_config(&from_config, command_name, run_command_flags, extra_args, recursion_depth + 1)?;
+        return Ok(())
+    } else {
+        return Err(anyhow::anyhow!("You must provide one of: a string representing a command, a fully qualified command, or a `from` field"))
+
+    }
 
     let FullCommand {
         ref prog,
@@ -119,7 +96,7 @@ fn run_command(
 
     if let Some(pre_cmds) = pre_cmds {
         for cmd in pre_cmds {
-            run_command_from_config(config, cmd, run_command_flags, &[])?;
+            run_command_from_config(config, &cmd, run_command_flags, &[], recursion_depth + 1)?;
         }
     }
 
@@ -172,7 +149,7 @@ fn run_command(
 
     if let Some(post_cmds) = post_cmds {
         for cmd in post_cmds {
-            run_command_from_config(config, cmd, run_command_flags, &[])?;
+            run_command_from_config(config, &cmd, run_command_flags, &[], recursion_depth + 1)?;
         }
     }
 

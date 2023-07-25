@@ -67,7 +67,7 @@ fn main() -> anyhow::Result<()> {
     if let Some(command_name) = args.command {
         run_command_from_config(
             &config,
-            command_name,
+            command_name.as_str(),
             &RunCommandFlags {
                 sd: args.sd,
                 quiet: args.quiet,
@@ -75,6 +75,7 @@ fn main() -> anyhow::Result<()> {
                 no_color: args.no_color,
             },
             args.extra_args.as_slice(),
+            0,
         )?
     }
 
