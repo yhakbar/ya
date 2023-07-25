@@ -1,0 +1,72 @@
+ensure_sd: |
+  if ! command -v sd >/dev/null; then
+    cargo install --locked sd
+  fi
+
+ensure_rg: |
+  if ! command -v rg >/dev/null; then
+    cargo install --locked ripgrep
+  fi
+
+release_patch:
+  chdir: $GIT_ROOT
+  pre_cmds:
+    - ensure_sd
+    - ensure_rg
+  cmd: |
+    set -euo pipefail
+
+    version=$(cargo pkgid | sd '^.*#([^ ]+)$' '$1')
+    major=$(echo "$version" | sd '^([0-9]+)\.[0-9]+\.[0-9]+$' '$1')
+    minor=$(echo "$version" | sd '^[0-9]+\.([0-9]+)\.[0-9]+$' '$1')
+    patch=$(echo "$version" | sd '^[0-9]+\.[0-9]+\.([0-9]+)$' '$1')
+    new_version="$major.$minor.$((patch + 1))"
+    echo "Bumping version from $version to $new_version"
+    sd '^version = "[0-9]+\.[0-9]+\.[0-9]+"$' "version = \"$new_version\"" Cargo.toml
+
+    git add Cargo.toml
+    git commit -m "Bump version to $new_version"
+    git tag -a "$new_version" -m "Tag $new_version"
+    git push --follow-tags
+
+release_minor:
+  chdir: $GIT_ROOT
+  pre_cmds:
+    - ensure_sd
+    - ensure_rg
+  cmd: |
+    set -euo pipefail
+
+    version=$(cargo pkgid | sd '^.*#([^ ]+)$' '$1')
+    major=$(echo "$version" | sd '^([0-9]+)\.[0-9]+\.[0-9]+$' '$1')
+    minor=$(echo "$version" | sd '^[0-9]+\.([0-9]+)\.[0-9]+$' '$1')
+    patch=$(echo "$version" | sd '^[0-9]+\.[0-9]+\.([0-9]+)$' '$1')
+    new_version="$major.$((minor + 1)).0"
+    echo "Bumping version from $version to $new_version"
+    sd '^version = "[0-9]+\.[0-9]+\.[0-9]+"$' "version = \"$new_version\"" Cargo.toml
+
+    git add Cargo.toml
+    git commit -m "Bump version to $new_version"
+    git tag -a "$new_version" -m "Tag $new_version"
+    git push --follow-tags
+
+release_major:
+  chdir: $GIT_ROOT
+  pre_cmds:
+    - ensure_sd
+    - ensure_rg
+  cmd: |
+    set -euo pipefail
+
+    version=$(cargo pkgid | sd '^.*#([^ ]+)$' '$1')
+    major=$(echo "$version" | sd '^([0-9]+)\.[0-9]+\.[0-9]+$' '$1')
+    minor=$(echo "$version" | sd '^[0-9]+\.([0-9]+)\.[0-9]+$' '$1')
+    patch=$(echo "$version" | sd '^[0-9]+\.[0-9]+\.([0-9]+)$' '$1')
+    new_version="$((major + 1)).0.0"
+    echo "Bumping version from $version to $new_version"
+    sd '^version = "[0-9]+\.[0-9]+\.[0-9]+"$' "version = \"$new_version\"" Cargo.toml
+
+    git add Cargo.toml
+    git commit -m "Bump version to $new_version"
+    git tag -a "$new_version" -m "Tag $new_version"
+    git push --follow-tags

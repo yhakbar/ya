@@ -20,3 +20,12 @@ format:
 build:
   prog: cargo
   args: ["build", "--release"]
+
+release_patch:
+  from: $GIT_ROOT/.config/ya/tag.yml
+
+release_minor:
+  from: $GIT_ROOT/.config/ya/tag.yml
+
+release_major:
+  from: $GIT_ROOT/.config/ya/tag.yml
