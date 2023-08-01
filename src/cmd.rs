@@ -41,6 +41,26 @@ pub struct RunCommandFlags {
     pub no_color: bool,
 }
 
+trait PrintExecution {
+    fn print_execution(&self, no_color: bool, extra_args: &[String]);
+}
+
+impl PrintExecution for FullCommand {
+    fn print_execution(&self, no_color: bool, extra_args: &[String]) {
+        let mut parsed_command = format!("$ {} {}", self.prog, self.args.join(" "));
+        if let Some(cmd) = &self.cmd {
+            parsed_command.push_str(&format!(" '{}'", cmd));
+        }
+        for arg in extra_args {
+            parsed_command.push_str(&format!(" {}", arg));
+        }
+        if !no_color {
+            parsed_command = parsed_command.blue().bold().to_string();
+        }
+        println!("{}", parsed_command);
+    }
+}
+
 fn run_command(
     config: &Value,
     command_name: &str,
@@ -106,6 +126,10 @@ fn run_command(
         }
     }
 
+    if run_command_flags.execution {
+        full_command.print_execution(run_command_flags.no_color, extra_args);
+    }
+
     let mut final_args = args.clone().to_vec();
 
     if let Some(cmd) = cmd {
@@ -117,14 +141,6 @@ fn run_command(
     }
 
     final_args.extend_from_slice(extra_args);
-
-    if run_command_flags.execution {
-        let mut parsed_command = format!("$ {} {}", prog, final_args.join(" "));
-        if !run_command_flags.no_color {
-            parsed_command = parsed_command.blue().bold().to_string();
-        }
-        println!("{}", parsed_command);
-    }
 
     let mut command_builder = Command::new(prog);
 

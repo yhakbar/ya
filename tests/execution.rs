@@ -12,7 +12,7 @@ mod basic {
             .current_dir("examples/basic")
             .assert()
             .success()
-            .stdout("$ bash -c echo \"Hey ya!\"\nHey ya!\n");
+            .stdout("$ bash -c 'echo \"Hey ya!\"'\nHey ya!\n");
 
         Ok(())
     }
