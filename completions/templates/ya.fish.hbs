@@ -1,0 +1,41 @@
+# Completions for ya
+
+## Version {{ version }}
+
+# Cross Platform Utilities
+function __ya_complete_key_filter
+  if command -v rg &> /dev/null
+    command rg '^([^:\s]+):.*$' $argv
+    return
+  end
+  command grep -E '^([^: ]+):.*$' $argv
+
+end
+
+function __ya_complete_key_clean
+  if command -v sd &> /dev/null
+    command sd '^([^:\s]+):.*$' '$1' $argv
+    return
+  end
+  command sed -E 's/^([^: ]+):.*$/\1/g' $argv
+end
+
+function __ya_complete_commands
+  if command -v yadayada &> /dev/null
+    yadayada k
+    return
+  end
+  ya -p | __ya_complete_key_filter | __ya_complete_key_clean
+end
+
+function __ya_complete_main
+  # Disabling default file completion
+  complete -c ya -f
+
+  # Static Switches
+{{ generated_completes }}
+  # Dynamic Subcommands
+  complete -c ya -n "not __fish_seen_subcommand_from (__ya_complete_commands)" -a "(__ya_complete_commands)"
+end
+
+__ya_complete_main $argv
