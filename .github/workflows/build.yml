@@ -80,8 +80,8 @@ jobs:
 
       - name: Compress `yadayada` Binary for Upload
         run: |
-          mv target/${{ matrix.target }}/release/yadayada yyadayada
-          tar -czf yadayada-${{ matrix.target }}.tar.gz ya
+          mv target/${{ matrix.target }}/release/yadayada yadayada
+          tar -czf yadayada-${{ matrix.target }}.tar.gz yadayada
 
       - name: Upload `ya` tarball
         uses: actions/upload-artifact@v3
