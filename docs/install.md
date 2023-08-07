@@ -26,9 +26,24 @@ brew install ya
 ```bash
 git clone https://github.com/yhakbar/ya.git
 cd ya
+```
+
+### With `yadayada`
+
+```bash
+cargo install --features yadayada --path .
+```
+
+### Without `yadayada`
+
+```bash
 cargo install --path .
 ```
 
 ## Manual
 
-Go [here](https://github.com/yhakbar/ya/releases/latest) and download the binary for your platform.
+Go [here](https://github.com/yhakbar/ya/releases/latest) and download the appropriate executable(s) for your platform.
+
+## Shell Completion
+
+I recommend reading [this](/docs/completions.md) for more information on how to install shell completions.
