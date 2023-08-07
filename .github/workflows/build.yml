@@ -71,15 +71,34 @@ jobs:
 
       - name: Cross Build
         if: matrix.use-cross
-        run: cross build --locked --release --target ${{ matrix.target }}
+        run: cross build --locked --release --target ${{ matrix.target }} --all-features
 
-      - name: Compress Binary for Upload
+      - name: Compress `ya` Binary for Upload
         run: |
           mv target/${{ matrix.target }}/release/ya ya
           tar -czf ya-${{ matrix.target }}.tar.gz ya
 
-      - name: Upload tarball
+      - name: Compress `yadayada` Binary for Upload
+        run: |
+          mv target/${{ matrix.target }}/release/yadayada yyadayada
+          tar -czf yadayada-${{ matrix.target }}.tar.gz ya
+
+      - name: Upload `ya` tarball
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.target }}
           path: ya-${{ matrix.target }}.tar.gz
+
+      - name: Upload `yadayada` tarball
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.target }}
+          path: yadayada-${{ matrix.target }}.tar.gz
+
+      - name: Upload Completions
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.target }}-completions
+          path: |
+            completions/release/*
+            !completions/release/.gitignore
