@@ -61,7 +61,7 @@ jobs:
 
       - name: Cargo Build
         if: ${{ ! matrix.use-cross }}
-        run: cargo build --locked --release --target ${{ matrix.target }}
+        run: cargo build --locked --release --all-features --target ${{ matrix.target }}
 
       - name: Setup Cross
         if: matrix.use-cross
@@ -71,7 +71,7 @@ jobs:
 
       - name: Cross Build
         if: matrix.use-cross
-        run: cross build --locked --release --target ${{ matrix.target }} --all-features
+        run: cross build --locked --release --all-features --target ${{ matrix.target }}
 
       - name: Compress `ya` Binary for Upload
         run: |
