@@ -29,7 +29,7 @@ pub enum YadaYadaSubcommand {
     },
 }
 
-/// Command completion to manage command completion for `ya`.
+/// Tool to manage command completion for `ya`.
 #[derive(Parser)]
 #[command(author, version, about, long_about = None, arg_required_else_help(true))]
 pub struct YadaYadaArgs {
