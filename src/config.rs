@@ -266,13 +266,11 @@ pub fn parse_cmd(cmd: &Value) -> anyhow::Result<ParsedConfig> {
             }
 
             Ok(ParsedConfig {
-                parsed_command: CommandType::FullCommand(
-                    FullCommand {
-                        prog: prog.to_string(),
-                        args,
-                        cmd: cmd.map(|s| s.to_string()),
-                    }
-                ),
+                parsed_command: CommandType::FullCommand(FullCommand {
+                    prog: prog.to_string(),
+                    args,
+                    cmd: cmd.map(|s| s.to_string()),
+                }),
                 pre_msg: pre_msg.map(|s| s.to_string()),
                 post_msg: post_msg.map(|s| s.to_string()),
                 pre_cmds,

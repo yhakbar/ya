@@ -41,3 +41,7 @@ Read the following for information on the config file: [docs/config.md](docs/con
 ## CLI
 
 Read the following for information on the CLI: [docs/cli.md](docs/cli.md).
+
+## Completions
+
+Read the following for information on the completions: [docs/completions.md](docs/completions.md).
