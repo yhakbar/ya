@@ -1,8 +1,10 @@
 use colored::Colorize;
 use serde_yaml::Value;
-use std::{process::Command, path::PathBuf};
+use std::{path::PathBuf, process::Command};
 
-use crate::config::{parse_cmd, resolve_chdir, FullCommand, ParsedConfig, CommandType, parse_config_from_file};
+use crate::config::{
+    parse_cmd, parse_config_from_file, resolve_chdir, CommandType, FullCommand, ParsedConfig,
+};
 
 const FROM_RECURSION_LIMIT: u64 = 10;
 
@@ -18,9 +20,15 @@ pub fn run_command_from_config(
         "Command {} not found in config",
         command_name
     ))?;
-    run_command(config, command_name, cmd, run_command_flags, extra_args, recursion_depth)
+    run_command(
+        config,
+        command_name,
+        cmd,
+        run_command_flags,
+        extra_args,
+        recursion_depth,
+    )
 }
-
 
 fn get_full_command_from_parsed_command(parsed_command: CommandType) -> Option<FullCommand> {
     match parsed_command {
@@ -38,15 +46,14 @@ pub struct RunCommandFlags {
     pub sd: Vec<String>,
     pub quiet: bool,
     pub execution: bool,
-    pub no_color: bool,
 }
 
 trait PrintExecution {
-    fn print_execution(&self, no_color: bool, extra_args: &[String]);
+    fn print_execution(&self, extra_args: &[String]);
 }
 
 impl PrintExecution for FullCommand {
-    fn print_execution(&self, no_color: bool, extra_args: &[String]) {
+    fn print_execution(&self, extra_args: &[String]) {
         let mut parsed_command = format!("$ {} {}", self.prog, self.args.join(" "));
         if let Some(cmd) = &self.cmd {
             parsed_command.push_str(&format!(" '{}'", cmd));
@@ -54,9 +61,7 @@ impl PrintExecution for FullCommand {
         for arg in extra_args {
             parsed_command.push_str(&format!(" {}", arg));
         }
-        if !no_color {
-            parsed_command = parsed_command.blue().bold().to_string();
-        }
+        parsed_command = parsed_command.blue().bold().to_string();
         println!("{}", parsed_command);
     }
 }
@@ -73,7 +78,7 @@ fn run_command(
         return Err(anyhow::anyhow!(
             "Recursive command calls reached: {}",
             FROM_RECURSION_LIMIT
-        ))
+        ));
     }
 
     let command = parse_cmd(cmd)?;
@@ -99,11 +104,16 @@ fn run_command(
         let from_path_buff = PathBuf::from(&from);
         let from_config = parse_config_from_file(from_path_buff.as_path())?;
 
-        run_command_from_config(&from_config, command_name, run_command_flags, extra_args, recursion_depth + 1)?;
-        return Ok(())
+        run_command_from_config(
+            &from_config,
+            command_name,
+            run_command_flags,
+            extra_args,
+            recursion_depth + 1,
+        )?;
+        return Ok(());
     } else {
-        return Err(anyhow::anyhow!("You must provide one of: a string representing a command, a fully qualified command, or a `from` field"))
-
+        return Err(anyhow::anyhow!("You must provide one of: a string representing a command, a fully qualified command, or a `from` field"));
     }
 
     let FullCommand {
@@ -127,7 +137,7 @@ fn run_command(
     }
 
     if run_command_flags.execution {
-        full_command.print_execution(run_command_flags.no_color, extra_args);
+        full_command.print_execution(extra_args);
     }
 
     let mut final_args = args.clone().to_vec();
