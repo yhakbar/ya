@@ -46,8 +46,8 @@ help  (Print this message or the help of the given subcommand(s))  install  (Ins
 
 ```fish
 ❯ ya -<tab>
--c  --config  (The config file)  -p  --print  (Print the config file before running)  -V  --version                                     (Print version)  --no-color            (No color)
--h  --help         (Print help)  -q  --quiet                (Suppress excess output)  -x  --execution  (Print the executed command before executing it)  --sd  (Search and displacements)
+-c  --config  (The config file)  -p  --print  (Print the config file before running)  -V  --version                                     (Print version)  --no-color  (No color)
+-h  --help         (Print help)  -q  --quiet                 (Suppress extra output)  -x  --execution  (Print the executed command before executing it)
 ```
 
 The reason `ya` does not always have full completion for commands is because it is not possible to know at compilation time what the available commands are going to be at runtime, due to the nature of the `ya` config system.

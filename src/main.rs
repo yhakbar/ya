@@ -8,7 +8,7 @@ use clap::Parser;
 use cli::Args;
 use cmd::{run_command_from_config, RunCommandFlags};
 use config::{get_config_path, parse_config_from_file, print_config_from_file};
-use validate::{validate_config_file, validate_sd};
+use validate::validate_config_file;
 
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
@@ -16,8 +16,6 @@ fn main() -> anyhow::Result<()> {
     if args.no_color {
         colored::control::set_override(false);
     }
-
-    validate_sd(&args.sd)?;
 
     let config_path = get_config_path(&args.config)?;
 
@@ -34,7 +32,6 @@ fn main() -> anyhow::Result<()> {
             &config,
             command_name.as_str(),
             &RunCommandFlags {
-                sd: args.sd,
                 quiet: args.quiet,
                 execution: args.execution,
             },
