@@ -46,24 +46,6 @@ build:
 
 Everything that follows the command name will be passed to the command as extra arguments.
 
-## Search and Displacements
-
-You can also specify replacement of certain values in the command before it is run. For example, you might want to have a certain value that you need substituted in the middle of a command. You can do that like so:
-
-```yml
-sd: echo "<person> loves <other person>!"
-```
-
-```bash
-❯ ya sd
-<person> loves <other person>!
-```
-
-```bash
-❯ ya --sd '<person>=ya' --sd '<other person>=you' sd
-ya loves you!
-```
-
 ## Execution
 
 Setting the `-x`/`--execute` flag will print any command that `ya` executes before executing it. This can be useful for debugging configurations.

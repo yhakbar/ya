@@ -43,7 +43,6 @@ fn get_full_command_from_parsed_command(parsed_command: CommandType) -> Option<F
 }
 
 pub struct RunCommandFlags {
-    pub sd: Vec<String>,
     pub quiet: bool,
     pub execution: bool,
 }
@@ -143,10 +142,6 @@ fn run_command(
     let mut final_args = args.clone().to_vec();
 
     if let Some(cmd) = cmd {
-        let cmd = run_command_flags.sd.iter().fold(cmd, |cmd, s| {
-            let (key, value) = s.split_once('=').unwrap();
-            cmd.replace(key, value)
-        });
         final_args.push(cmd);
     }
 

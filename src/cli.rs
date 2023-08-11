@@ -2,11 +2,11 @@ use clap::Parser;
 
 use std::path::PathBuf;
 
-/// Automation tool for lazy people.
+/// ya - yet another command runner.
 #[derive(Parser)]
 #[command(author, version, about, long_about = None, arg_required_else_help(true))]
 pub struct Args {
-    /// Suppress excess output.
+    /// Suppress extra output.
     #[arg(short, long, default_value_t = false)]
     pub quiet: bool,
 
@@ -17,10 +17,6 @@ pub struct Args {
     /// Print the config file before running.
     #[arg(short, long, default_value_t = false)]
     pub print: bool,
-
-    /// Search and displacements.
-    #[arg(long)]
-    pub sd: Vec<String>,
 
     /// Print the executed command before executing it.
     #[arg(short = 'x', long, default_value_t = false)]

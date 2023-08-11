@@ -1,25 +1,25 @@
 # Ya
 
-A very simple automation tool for lazy folks that don't want to learn `make`.
+A very simple automation tool for folks that don't want to learn `make`.
 
 ## Usage
 
 ```bash
 ❯ ya
-Automation tool for lazy people
+ya - yet another command runner
 
 Usage: ya [OPTIONS] [COMMAND] [EXTRA_ARGS]...
 
 Arguments:
-  [COMMAND]        The command in the config to use
+  [COMMAND]        The command to run
   [EXTRA_ARGS]...  The extra arguments to pass to the command
 
 Options:
-  -q, --quiet            Suppress the output of `pre_msg` and `post_msg`
-  -c, --config <CONFIG>  The config file to use
-  -p, --print            Print the config file before running the command
-      --sd <SD>          Search and displacements to make in the command before running it. Expects a key and value separated by an `=`. e.g. `--sd key=value`
-  -x, --execute          Print the command that will be executed before executing it
+  -q, --quiet            Suppress extra output
+  -c, --config <CONFIG>  The config file
+  -p, --print            Print the config file before running
+  -x, --execution        Print the executed command before executing it
+      --no-color         No color
   -h, --help             Print help
   -V, --version          Print version
 ```
