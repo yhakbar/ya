@@ -18,8 +18,8 @@ serde_json = { version = "1.0.104", optional = true }
 anyhow = "1.0.72"
 clap = { version = "4.3.19", features = ["derive", "cargo"] }
 colored = "2.0.4"
-home = "0.5.5"
 serde_yaml = "0.9.25"
+home = { version = "0.5.5", optional = true }
 clap_complete = { version = "4.3.2", optional = true }
 handlebars = {version = "4.3.7", optional = true }
 serde_json = { version = "1.0.104", optional = true }
@@ -47,4 +47,4 @@ required-features = ["yadayada"]
 completion = ["clap_complete"]
 templating = ["handlebars", "serde_json"]
 gh-release = ["completion", "templating"]
-yadayada = ["completion", "templating"]
+yadayada = ["completion", "templating", "home"]

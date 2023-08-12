@@ -8,18 +8,6 @@ dir2:
   cmd: cat test.txt
   chdir: dir2
 
-home:
-  cmd: |
-    if [ -f ~/test.txt ]; then
-      echo 'Will not edit file.txt in your home directory as part of this test. Please delete it, then run the test again.'
-      exit 1
-    fi
-
-    echo 'Home directory' > ~/test.txt
-    cat test.txt
-    rm -f ~/test.txt
-  chdir: $HOME
-
 git:
   cmd: cat test.txt
   chdir: $GIT_ROOT/examples/chdir/git

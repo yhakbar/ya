@@ -37,16 +37,6 @@ mod chdir {
         Ok(())
     }
     #[test]
-    fn chdir_home() -> Result<()> {
-        ya().args(["home"])
-            .current_dir("examples/chdir")
-            .assert()
-            .success()
-            .stdout("Home directory\n");
-
-        Ok(())
-    }
-    #[test]
     fn chdir_git() -> Result<()> {
         ya().args(["git"])
             .current_dir("examples/chdir")
