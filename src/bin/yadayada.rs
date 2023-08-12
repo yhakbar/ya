@@ -1,8 +1,8 @@
 use anyhow::Ok;
 use clap::{CommandFactory, Parser, Subcommand};
 use home::home_dir;
-use serde_yaml::Value;
-use std::path::PathBuf;
+use serde_yaml::{Value, Mapping};
+use std::{fs::OpenOptions, path::PathBuf, io::Write};
 use ya::{cli::Args, completion::build_fish_completion, config::get_config_path};
 
 #[derive(Subcommand)]
@@ -26,6 +26,22 @@ pub enum YadaYadaSubcommand {
         /// The config to print the keys of.
         #[arg(short, long)]
         config: Option<PathBuf>,
+    },
+
+    /// Alias a command, and add to config.
+    #[command(about, long_about = None, alias = "a")]
+    Alias {
+        /// The config to add the alias to.
+        #[arg(short, long)]
+        config: Option<PathBuf>,
+
+        /// The name of the alias.
+        #[arg()]
+        name: String,
+
+        /// The command to alias.
+        #[arg()]
+        command: String,
     },
 }
 
@@ -101,6 +117,30 @@ fn main() -> anyhow::Result<()> {
                                 println!("{}", key);
                             }
                         }
+                        return Ok(());
+                    }
+                    _ => return Ok(()),
+                }
+            }
+            YadaYadaSubcommand::Alias {
+                config,
+                name,
+                command,
+            } => {
+                let config_path = get_config_path(&config)?;
+                let config = ya::config::parse_config_from_file(&config_path)?;
+                match config {
+                    Value::Mapping(config) => {
+                        if config.contains_key(&name) {
+                            return Err(anyhow::anyhow!("Alias `{}` already exists", name));
+                        }
+                        let mut config_to_append = Mapping::new();
+                        config_to_append.insert(Value::String(name), Value::String(command));
+                        let mut file = OpenOptions::new()
+                            .append(true)
+                            .open(&config_path)?;
+                        file.write_all(b"\n")?;
+                        serde_yaml::to_writer(&mut file, &config_to_append)?;
                         return Ok(());
                     }
                     _ => return Ok(()),
