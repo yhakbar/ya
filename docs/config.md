@@ -44,12 +44,8 @@ Ya will look for a config file in the following locations, in order:
 - `$GIT_ROOT/ya.yaml`
 - `$GIT_ROOT/.config/ya.yml`
 - `$GIT_ROOT/.config/ya.yaml`
-- `$HOME/ya.yml`
-- `$HOME/ya.yaml`
-- `$HOME/.config/ya.yml`
-- `$HOME/.config/ya.yaml`
 
-Where `$GIT_ROOT` is the root of the git repository that the current directory is in, and `$HOME` is the home directory of the current user.
+Where `$GIT_ROOT` is the root of the git repository that the current directory is in.
 
 Note that although the highest precedence config file is the one in the current directory, I recommend tucking your config file into the `.config` directory for repository configurations. This reduces clutter in your repo and allows you to quickly override the config file by creating a temporary config in the current directory.
 
@@ -175,7 +171,7 @@ install:
   chdir: $GIT_ROOT
 ```
 
-The value of `chdir` can be any valid path. It can be an absolute path, a relative path, or a path relative to the root of the git repository that the current directory is in. You can use the `$GIT_ROOT` variable to refer to the root of the git repository that the current directory is in and the `$HOME` variable to refer to the home directory of the current user.
+The value of `chdir` can be any valid path. It can be an absolute path, a relative path, or a path relative to the root of the git repository that the current directory is in. You can use the `$GIT_ROOT` variable to refer to the root of the git repository that the current directory is in.
 
 ### From
 

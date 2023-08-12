@@ -1,4 +1,3 @@
-use home::home_dir;
 use serde_yaml::Value;
 use std::fs::File;
 use std::io::BufReader;
@@ -30,16 +29,6 @@ pub fn get_config_path(path: &Option<PathBuf>) -> anyhow::Result<PathBuf> {
                 }
             }
 
-            let home = home_dir();
-            if let Some(home) = home {
-                for config_path in DEFAULT_CONFIG_PATHS.iter() {
-                    let path = Path::new(&home).join(config_path);
-                    if path.exists() && path.is_file() {
-                        return Ok(path);
-                    }
-                }
-            }
-
             return Err(anyhow::anyhow!(
                 "Could not find config file in default locations. Please specify a config file."
             ));
@@ -49,15 +38,6 @@ pub fn get_config_path(path: &Option<PathBuf>) -> anyhow::Result<PathBuf> {
 }
 
 pub fn resolve_chdir(chdir: String) -> anyhow::Result<String> {
-    if chdir.starts_with("$HOME") {
-        let home = home_dir();
-        if let Some(home) = home {
-            let home = home.to_str().unwrap();
-            let chdir = chdir.replace("$HOME", home);
-            return Ok(chdir);
-        }
-    }
-
     if chdir.starts_with("$GIT_ROOT") {
         let git_root = get_git_root();
         if let Ok(git_root) = git_root {
