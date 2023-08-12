@@ -19,7 +19,6 @@ anyhow = "1.0.72"
 clap = { version = "4.3.19", features = ["derive", "cargo"] }
 colored = "2.0.4"
 home = "0.5.5"
-serde_derive = "1.0.179"
 serde_yaml = "0.9.25"
 clap_complete = { version = "4.3.2", optional = true }
 handlebars = {version = "4.3.7", optional = true }
@@ -27,6 +26,7 @@ serde_json = { version = "1.0.104", optional = true }
 
 [dev-dependencies]
 assert_cmd = "2.0.12"
+tempdir = "0.3.7"
 
 [profile.release]
 strip = true
