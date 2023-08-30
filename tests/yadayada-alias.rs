@@ -1,28 +1,17 @@
 #[cfg(test)]
-mod basic {
+mod alias {
     use anyhow::Result;
     use assert_cmd::Command;
-    use tempdir::TempDir;
+    use tempfile::tempdir;
 
     fn yadayada() -> Command {
         Command::cargo_bin("yadayada").expect("Error invoking yadayada")
     }
 
     #[test]
-    fn basic() -> Result<()> {
+    fn alias() -> Result<()> {
         for command in ["alias", "a"] {
-            // Create a temporary directory.
-            // We want to write a yaml file "ya.yml" to it.
-            // We want to run yadayada from it.
-            // After we run yadayada, we expect an alias to be created in ya.yml.
-            // We expect the alias to be "echo-test".
-
-            // Create a temporary directory.
-            // We want to write a yaml file "ya.yml" to it.
-
-            let prefix = format!("yadayada-{}-test", &command);
-
-            let tmp = TempDir::new(&prefix)?;
+            let tmp = tempdir()?;
 
             let tmp_ya_yml = tmp.path().join("ya.yml");
             let mut value = serde_yaml::Mapping::new();

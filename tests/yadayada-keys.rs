@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod basic {
+mod keys {
     use anyhow::Result;
     use assert_cmd::Command;
     fn yadayada() -> Command {
@@ -7,7 +7,7 @@ mod basic {
     }
 
     #[test]
-    fn basic() -> Result<()> {
+    fn keys() -> Result<()> {
         for command in ["keys", "k"] {
             yadayada().args([command])
                 .current_dir("examples/basic")

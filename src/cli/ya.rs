@@ -5,7 +5,7 @@ use std::path::PathBuf;
 /// ya - yet another command runner.
 #[derive(Parser)]
 #[command(author, version, about, long_about = None, arg_required_else_help(true))]
-pub struct Args {
+pub struct YaArgs {
     /// Suppress extra output.
     #[arg(short, long, default_value_t = false)]
     pub quiet: bool,

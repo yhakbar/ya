@@ -4,3 +4,4 @@ pub mod completion;
 pub mod config;
 pub mod git;
 pub mod validate;
+pub mod template;
