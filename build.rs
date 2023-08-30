@@ -5,7 +5,7 @@ use std::io::Error;
 use clap::CommandFactory;
 
 #[cfg(feature = "gh-release")]
-include!("src/cli.rs");
+include!("src/cli/ya.rs");
 #[cfg(feature = "gh-release")]
 include!("src/completion.rs");
 
@@ -13,7 +13,7 @@ include!("src/completion.rs");
 fn build_completions() -> Result<(), Error> {
     let release_dir = "completions/release";
 
-    let mut cmd = Args::command();
+    let mut cmd = YaArgs::command();
 
     build_templated_completions(&mut cmd, release_dir)?;
 

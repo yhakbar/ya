@@ -1,62 +1,18 @@
-use anyhow::Ok;
-use clap::{CommandFactory, Parser, Subcommand};
+use anyhow::{bail, Ok};
+use clap::{CommandFactory, Parser};
 use home::home_dir;
-use serde_yaml::{Value, Mapping};
-use std::{fs::OpenOptions, path::PathBuf, io::Write};
-use ya::{cli::Args, completion::build_fish_completion, config::get_config_path};
-
-#[derive(Subcommand)]
-pub enum YadaYadaSubcommand {
-    /// Install command completion for `ya` and `yadayada`.
-    #[command(about, long_about = None, alias = "i")]
-    Install {
-        /// The shell to install command completion for.
-        #[arg(short, long)]
-        shell: Option<String>,
-
-        /// The directory to install command completion to.
-        /// Defaults to best guess for the shell.
-        #[arg(short, long)]
-        directory: Option<PathBuf>,
-    },
-
-    /// Print keys of a config.
-    #[command(about, long_about = None, alias = "k")]
-    Keys {
-        /// The config to print the keys of.
-        #[arg(short, long)]
-        config: Option<PathBuf>,
-    },
-
-    /// Alias a command, and add to config.
-    #[command(about, long_about = None, alias = "a")]
-    Alias {
-        /// The config to add the alias to.
-        #[arg(short, long)]
-        config: Option<PathBuf>,
-
-        /// The name of the alias.
-        #[arg()]
-        name: String,
-
-        /// The command to alias.
-        #[arg()]
-        command: String,
-    },
-}
-
-/// Tool to manage command completion for `ya`.
-#[derive(Parser)]
-#[command(author, version, about, long_about = None, arg_required_else_help(true))]
-pub struct YadaYadaArgs {
-    /// No color.
-    #[arg(long, default_value_t = false)]
-    pub no_color: bool,
-
-    /// Subcommand of `yadayada`.
-    #[command(subcommand)]
-    pub subcommand: Option<YadaYadaSubcommand>,
-}
+use serde_yaml::{Mapping, Value};
+use std::{
+    fs::OpenOptions,
+    io::Write,
+    path::PathBuf,
+};
+use ya::{
+    cli::{ya::YaArgs, yadayada::{YadaYadaArgs, YadaYadaSubcommand, TemplateSubcommand}},
+    completion::build_fish_completion,
+    config::get_config_path,
+    template::{list_templates, save_template, stamp_template},
+};
 
 fn main() -> anyhow::Result<()> {
     let args = YadaYadaArgs::parse();
@@ -87,21 +43,21 @@ fn main() -> anyhow::Result<()> {
                                     let fish_dir = home_dir.join(".config/fish/completions");
                                     Ok(fish_dir)
                                 } else {
-                                    return Err(anyhow::anyhow!("Could not find home directory"));
+                                    bail!("Could not find home directory");
                                 }
                             }
                         }?;
                         if let Some(directory) = directory.to_str() {
-                            let mut cmd = Args::command();
+                            let mut cmd = YaArgs::command();
                             build_fish_completion(&mut cmd, directory, "ya")?;
                             let mut cmd = YadaYadaArgs::command();
                             build_fish_completion(&mut cmd, directory, "yadayada")?;
                         } else {
-                            return Err(anyhow::anyhow!("Could not convert directory to string"));
+                            bail!("Could not convert directory to string");
                         }
                     }
                     _ => {
-                        return Err(anyhow::anyhow!("Shell `{}` not supported for automatic installation. Please install completion manually.", shell));
+                        bail!("Shell `{}` not supported for automatic installation. Please install completion manually.", shell);
                     }
                 }
             }
@@ -132,18 +88,30 @@ fn main() -> anyhow::Result<()> {
                 match config {
                     Value::Mapping(config) => {
                         if config.contains_key(&name) {
-                            return Err(anyhow::anyhow!("Alias `{}` already exists", name));
+                            bail!("Alias `{}` already exists", name);
                         }
                         let mut config_to_append = Mapping::new();
                         config_to_append.insert(Value::String(name), Value::String(command));
-                        let mut file = OpenOptions::new()
-                            .append(true)
-                            .open(&config_path)?;
+                        let mut file = OpenOptions::new().append(true).open(&config_path)?;
                         file.write_all(b"\n")?;
                         serde_yaml::to_writer(&mut file, &config_to_append)?;
                         return Ok(());
                     }
                     _ => return Ok(()),
+                }
+            }
+            YadaYadaSubcommand::Template { subcommand } => {
+                if let Some(subcommand) = subcommand {
+                    match subcommand {
+                        TemplateSubcommand::List { dir } => list_templates(dir)?,
+                        TemplateSubcommand::Save {
+                            file,
+                            parameters,
+                            hidden,
+                            dir,
+                        } => save_template(dir, file, parameters, hidden)?,
+                        TemplateSubcommand::Stamp { dir, parameters, source, target } => stamp_template(source, target, dir, parameters)?,
+                    }
                 }
             }
         }

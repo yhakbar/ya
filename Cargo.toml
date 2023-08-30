@@ -21,12 +21,14 @@ colored = "2.0.4"
 serde_yaml = "0.9.25"
 home = { version = "0.5.5", optional = true }
 clap_complete = { version = "4.4.0", optional = true }
-handlebars = {version = "4.3.7", optional = true }
+handlebars = {version = "4.3.7", features = ["dir_source"], optional = true }
 serde_json = { version = "1.0.105", optional = true }
+ignore = { version = "0.4.20", optional = true }
+dialoguer = { version = "0.10.4", optional = true }
 
 [dev-dependencies]
 assert_cmd = "2.0.12"
-tempdir = "0.3.7"
+tempfile = "3.8.0"
 
 [profile.release]
 strip = true
@@ -36,7 +38,7 @@ panic = "abort"
 
 [[bin]]
 name = "ya"
-path = "src/main.rs"
+path = "src/bin/ya.rs"
 
 [[bin]]
 name = "yadayada"
@@ -45,6 +47,6 @@ required-features = ["yadayada"]
 
 [features]
 completion = ["clap_complete"]
-templating = ["handlebars", "serde_json"]
+templating = ["handlebars", "serde_json", "ignore", "dialoguer"]
 gh-release = ["completion", "templating"]
 yadayada = ["completion", "templating", "home"]

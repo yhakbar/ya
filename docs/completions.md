@@ -4,7 +4,7 @@
 
 The best supported shell is `fish`, with best effort support a handful of other shells.
 
-Command completion is best done when used with the sister binary in this project, `yadayada`, which provides utilities for local development.
+Command completion is best done when used with the sister binary in this project, [yadayada](./yadayada/cli.md), which provides utilities for local development.
 
 ## Installation
 
