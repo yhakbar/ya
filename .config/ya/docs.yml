@@ -1,0 +1,13 @@
+stamp:
+  chdir: $GIT_ROOT
+  cmd: |
+    set -euo pipefail
+
+    yadayada template stamp \
+    -p "help=$(ya --help)" \
+    -p "yadayada_help=$(yadayada --help)" \
+    -p "yadayada_template_help=$(yadayada template --help)" \
+    -p "yadayada_template_list_help=$(yadayada template list --help)" \
+    -p "yadayada_template_save_help=$(yadayada template save --help)" \
+    -p "yadayada_template_stamp_help=$(yadayada template stamp --help)" \
+    docs .

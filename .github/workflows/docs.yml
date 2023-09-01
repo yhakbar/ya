@@ -1,0 +1,44 @@
+name: Docs
+on:
+  workflow_call:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash -euo pipefail {0}
+
+jobs:
+  docs:
+    name: Docs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - uses: jdxcode/rtx-action@v1
+
+      - name: Cache Cargo
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install
+        run: cargo install --features yadayada --path .
+
+      - name: Run docs stamp
+        run: ya -c .config/ya/docs.yml stamp
+
+      - name: "Docs check"
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "Documentation is out of date. Please run 'ya -c .config/ya/docs.yml stamp' and commit the changes."
+            git status
+            exit 1
+          fi
