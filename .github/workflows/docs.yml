@@ -1,0 +1,40 @@
+name: Docs
+on:
+  workflow_call:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash -euo pipefail {0}
+
+jobs:
+  docs:
+    name: Docs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: assets
+
+      - name: Move `ya` and `yadayada` to appropriate locations
+        run: |
+          mkdir -p /usr/local/bin
+          mv assets/ya /usr/local/bin/ya
+          mv assets/yadayada /usr/local/bin/yadayada
+          ya --version
+          yadayada --version
+
+      - name: Run docs stamp
+        run: ya -c .config/ya/docs.yml stamp
+
+      - name: "Docs check"
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "Documentation is out of date. Please run 'ya -c .config/ya/docs.yml stamp' and commit the changes."
+            exit 1
+          fi

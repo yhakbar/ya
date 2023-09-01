@@ -1,11 +1,11 @@
+name: Push
+
 on:
   push:
     branches:
       - "*"
   pull_request:
     types: [opened, reopened, synchronize]
-
-name: Push
 
 jobs:
   lint:
@@ -14,3 +14,11 @@ jobs:
   test:
     name: Test
     uses: ./.github/workflows/test.yml
+  build:
+    name: Build
+    uses: ./.github/workflows/build.yml
+
+  docs:
+    needs: [build]
+    name: Docs
+    uses: ./.github/workflows/docs.yml
