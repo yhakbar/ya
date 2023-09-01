@@ -19,19 +19,22 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
-          name: ya-x86_64-unknown-linux-gnu.tar.gz
+          name: ya-x86_64-unknown-linux-gnu
           path: /usr/local/bin/ya.tar.gz
 
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
-          name: yadayada-x86_64-unknown-linux-gnu.tar.gz
+          name: yadayada-x86_64-unknown-linux-gnu
           path: /usr/local/bin/yadayada.tar.gz
 
       - name: Move `ya` and `yadayada` to appropriate locations
         run: |
-          tar -xzf /usr/local/bin/ya.tar.gz -C /usr/local/bin
-          tar -xzf /usr/local/bin/yadayada.tar.gz -C /usr/local/bin
+          cd /usr/local/bin
+          tar -xzf ya.tar.gz
+          tar -xzf yadayada.tar.gz
+          rm -f ya.tar.gz
+          rm -f yadayada.tar.gz
           ya --version
           yadayada --version
 
