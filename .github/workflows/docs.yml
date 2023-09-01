@@ -16,27 +16,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: ya-x86_64-unknown-linux-gnu
-          path: /usr/local/bin/
+      - uses: jdxcode/rtx-action@v1
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: yadayada-x86_64-unknown-linux-gnu
-          path: /usr/local/bin/
+      - name: Install
+        run: cargo install --features yadayada --path .
 
-      - name: Move `ya` and `yadayada` to appropriate locations
-        run: |
-          cd /usr/local/bin
-          tar -xzf ya-x86_64-unknown-linux-gnu
-          tar -xzf yadayada-x86_64-unknown-linux-gnu
-          rm -f ya.tar.gz
-          rm -f yadayada.tar.gz
-          ya --version
-          yadayada --version
+      - name: Cache Cargo
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Run docs stamp
         run: ya -c .config/ya/docs.yml stamp

@@ -14,11 +14,6 @@ jobs:
   test:
     name: Test
     uses: ./.github/workflows/test.yml
-  build:
-    name: Build
-    uses: ./.github/workflows/build.yml
-
   docs:
-    needs: [build]
     name: Docs
     uses: ./.github/workflows/docs.yml
