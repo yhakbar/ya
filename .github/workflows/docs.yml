@@ -18,9 +18,6 @@ jobs:
 
       - uses: jdxcode/rtx-action@v1
 
-      - name: Install
-        run: cargo install --features yadayada --path .
-
       - name: Cache Cargo
         uses: actions/cache@v3
         with:
@@ -31,6 +28,9 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install
+        run: cargo install --features yadayada --path .
 
       - name: Run docs stamp
         run: ya -c .config/ya/docs.yml stamp
