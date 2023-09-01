@@ -1,0 +1,8 @@
+template:
+  inputs:
+    - help
+    - yadayada_help
+    - yadayada_template_help
+    - yadayada_template_list_help
+    - yadayada_template_save_help
+    - yadayada_template_stamp_help

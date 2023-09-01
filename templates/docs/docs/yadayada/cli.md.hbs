@@ -10,21 +10,7 @@ To install `yadayada`, follow the instructions found in [the installation sectio
 
 ```bash
 ❯ yadayada --help
-yadayada - save yourself some chatter
-
-Usage: yadayada [OPTIONS] [COMMAND]
-
-Commands:
-  install   Install command completion for `ya` and `yadayada`
-  keys      Print keys of a config
-  alias     Alias a command, and add to config
-  template  Manage templates
-  help      Print this message or the help of the given subcommand(s)
-
-Options:
-      --no-color  No color
-  -h, --help      Print help
-  -V, --version   Print version
+{{yadayada_help}}
 ```
 
 ## Commands
@@ -49,18 +35,7 @@ The `template` command is used to simply manage templates. This is useful for qu
 
 ```bash
 ❯ yadayada template --help
-Manage templates
-
-Usage: yadayada template [COMMAND]
-
-Commands:
-  list   List templates
-  stamp  Stamp a saved template
-  save   Save a template from an existing file path
-  help   Print this message or the help of the given subcommand(s)
-
-Options:
-  -h, --help  Print help
+{{yadayada_template_help}}
 ```
 
 #### List
@@ -69,13 +44,7 @@ The `list` command is used to list templates.
 
 ```bash
 ❯ yadayada template list --help
-List templates
-
-Usage: yadayada template list [OPTIONS]
-
-Options:
-  -d, --dir <DIR>  The templates directory to list
-  -h, --help       Print help
+{{yadayada_template_list_help}}
 ```
 
 `yadayada` uses [handlebars](https://handlebarsjs.com/) template directories. The default templates directory location is `./templates`. To manually specify a different directory, use the `-d` flag.
@@ -86,23 +55,12 @@ The `save` command is used to save a file/directory template from an existing fi
 
 ```bash
 ❯ yadayada template save --help
-Save a template from an existing file path
-
-Usage: yadayada template save [OPTIONS] <FILE>
-
-Arguments:
-  <FILE>  The file path of the template
-
-Options:
-  -d, --dir <DIR>                The templates directory to save to
-  -p, --parameters <PARAMETERS>  Strings to replace with parameters in the template
-  -H, --hidden                   Save hidden files too
-  -h, --help                     Print help
+{{yadayada_template_save_help}}
 ```
 
 Using the `-p` flag, you can specify strings to replace with parameters in the template. This is useful for creating templates that are parameterized.
 
-For example, if you have a template that contains the string `Pikachu`, you can use the `-p` flag to replace that string like so `pokemon=Pikachu`. Any templates that are saved that contain the string `Pikachu` will then be replaced with the handlebar expression `{{pokemon}}` when they are saved.
+For example, if you have a template that contains the string `Pikachu`, you can use the `-p` flag to replace that string like so `pokemon=Pikachu`. Any templates that are saved that contain the string `Pikachu` will then be replaced with the handlebar expression `\{{pokemon}}` when they are saved.
 
 ```bash
 ❯ echo 'Pikachu is a pokemon!' > facts.txt
@@ -112,7 +70,7 @@ For example, if you have a template that contains the string `Pikachu`, you can 
 Creating template "facts.txt"
 
 ❯ cat templates/facts.txt/facts.txt.hbs
-{{pokemon}} is a pokemon!
+\{{pokemon}} is a pokemon!
 ❯ cat templates/facts.txt/.config/yadayada.yml
 template:
   inputs:
@@ -125,23 +83,12 @@ The `stamp` command is used to stamp a template. All file templates located with
 
 ```bash
 ❯ yadayada template stamp --help
-Stamp a saved template
-
-Usage: yadayada template stamp [OPTIONS] <SOURCE> <TARGET>
-
-Arguments:
-  <SOURCE>  The template to stamp
-  <TARGET>  The target of the template
-
-Options:
-  -d, --dir <DIR>                The templates directory to fetch from
-  -p, --parameters <PARAMETERS>  Strings to replace parameters with from the template
-  -h, --help                     Print help
+{{yadayada_template_stamp_help}}
 ```
 
 Use the `-p` flag to specify strings to replace parameters with from the template. This is useful for stamping templates that are parameterized.
 
-For example, if you have a template that contains the handlebar expression `{{pokemon}}`, you can use the `-p` flag to replace that expression like so `pokemon=Charizard`. Any templates that are stamped that contain the handlebar expression `{{pokemon}}` will then be replaced with the string `Charizard` when they are stamped.
+For example, if you have a template that contains the handlebar expression `\{{pokemon}}`, you can use the `-p` flag to replace that expression like so `pokemon=Charizard`. Any templates that are stamped that contain the handlebar expression `\{{pokemon}}` will then be replaced with the string `Charizard` when they are stamped.
 
 ```bash
 ❯ yadayada template stamp -p 'pokemon=Charizard' facts.txt .
