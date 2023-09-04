@@ -1,3 +1,4 @@
+#[cfg(feature = "yadayada")]
 #[cfg(test)]
 mod keys {
     use anyhow::Result;

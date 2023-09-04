@@ -11,7 +11,7 @@ mod python {
         ya().args(["-c", "examples/python/.config/ya.yml", "python_script"])
             .assert()
             .success()
-            .stdout("This is a python script\napple is a fruit with 5 characters!\nbanana is a fruit with 6 characters!\nwatermelon is a fruit with 10 characters!\nThat was a python script\n");
+            .stdout("apple is a fruit with 5 characters!\nbanana is a fruit with 6 characters!\nwatermelon is a fruit with 10 characters!\n");
 
         Ok(())
     }

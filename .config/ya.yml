@@ -19,11 +19,14 @@ build:
   prog: cargo
   args: ["build", "--release", "--all-features"]
 
-release_patch:
-  from: $GIT_ROOT/.config/ya/tag.yml
-
-release_minor:
-  from: $GIT_ROOT/.config/ya/tag.yml
-
-release_major:
-  from: $GIT_ROOT/.config/ya/tag.yml
+release:
+  sub:
+    patch:
+      from: $GIT_ROOT/.config/ya/tag.yml
+      cmd: release_patch
+    minor:
+      from: $GIT_ROOT/.config/ya/tag.yml
+      cmd: release_minor
+    major:
+      from: $GIT_ROOT/.config/ya/tag.yml
+      cmd: release_major

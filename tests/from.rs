@@ -36,4 +36,14 @@ mod from {
 
         Ok(())
     }
+    #[test]
+    fn alternate() -> Result<()> {
+        ya().args(["run"])
+            .current_dir("examples/from/alternate")
+            .assert()
+            .success()
+            .stdout("Alternate hey, from the from directory!\n");
+
+        Ok(())
+    }
 }

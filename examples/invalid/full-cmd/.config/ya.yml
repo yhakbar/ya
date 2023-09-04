@@ -1,0 +1,4 @@
+run:
+  prog: echo
+  args: ["Hey!"]
+  fake: value

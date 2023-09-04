@@ -1,1 +1,2 @@
 run: echo "Hey, from the from directory!"
+alternate: echo "Alternate hey, from the from directory!"
