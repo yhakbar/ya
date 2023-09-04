@@ -1,0 +1,5 @@
+release:
+  sub:
+    version:
+      from: .config/ya/release.yml
+      cmd: release_version

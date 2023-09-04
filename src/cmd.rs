@@ -150,12 +150,14 @@ impl Runnable for FromCommand {
         let from_config = parse_config_from_file(from_path_buff.as_path())?;
         let command_name = &self.cmd;
 
-
-
         let recursion_depth = std::env::var("__YA_RECURSION_DEPTH").unwrap_or("0".to_string()).parse::<u64>().unwrap_or(0);
         std::env::set_var("__YA_RECURSION_DEPTH", (recursion_depth + 1).to_string());
 
-        std::env::set_var("YA_CONFIG", from_path_buff.to_str().unwrap_or(""));
+        let run_command_flags = &RunCommandFlags {
+            execution: run_command_flags.execution,
+            quiet: run_command_flags.quiet,
+            config: from_path_buff,
+        };
 
         run_command_from_config(
             &from_config,
