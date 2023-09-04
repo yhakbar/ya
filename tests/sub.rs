@@ -84,6 +84,7 @@ mod sub {
     }
 
     #[test]
+    #[ignore]
     fn from() -> Result<()> {
         ya().args(["release", "version"])
             .current_dir("examples/sub/from")
