@@ -82,4 +82,16 @@ mod sub {
 
         Ok(())
     }
+
+    #[test]
+    #[ignore]
+    fn from() -> Result<()> {
+        ya().args(["release", "version"])
+            .current_dir("examples/sub/from")
+            .assert()
+            .success()
+            .stdout(".config/ya/release.yml\nEnsuring dependency\nReleasing a version!\n");
+
+        Ok(())
+    }
 }

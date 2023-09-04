@@ -1,0 +1,11 @@
+ensure_dep: |
+  echo "Ensuring dependency"
+
+release_version: |
+  set -euo pipefail
+
+  echo "$YA_CONFIG"
+
+  ya ensure_dep
+
+  echo "Releasing a version!"
