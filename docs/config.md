@@ -72,7 +72,9 @@ Where `$GIT_ROOT` is the root of the git repository that the current directory i
 
 Note that although the highest precedence config file is the one in the current directory, I recommend tucking your config file into a `.config` directory when you can. This reduces clutter in your repo and allows you to quickly override the config file by creating a temporary config in the current directory.
 
-You can also explicitly specify a config file with the `-c`/`--config` flag.
+You can also explicitly specify a config file with the `-c`/`--config` flag or by setting the `YA_CONFIG` environment variable with the path to the config file. Note that if both are set, the flag will take precedence.
+
+Note that the `YA_CONFIG` is used to simplify the process of discovering config files when calling `ya` recursively. For example, if you have a config file in a non-default location, and use `-c` to specify it, the default behavior of `ya` will be to re-use that config file.
 
 ## Building a Config
 

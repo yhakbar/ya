@@ -20,6 +20,17 @@ pub fn get_config_path(path: &Option<PathBuf>) -> anyhow::Result<PathBuf> {
     let path = match path {
         Some(path) => path,
         None => {
+            if let Some(ya_config) = std::env::var_os("YA_CONFIG") {
+                let ya_config_path = Path::new(&ya_config);
+                if ya_config_path.exists() && ya_config_path.is_file() {
+                    return Ok(ya_config_path.to_path_buf());
+                }
+                return Err(anyhow::anyhow!(
+                    "Could not find config file in $YA_CONFIG: {}",
+                    ya_config.to_string_lossy()
+                ));
+            }
+
             for config_location in DEFAULT_CONFIG_LOCATIONS.iter() {
                 let config_location = if config_location.starts_with("$GIT_ROOT") {
                     let git_root = get_git_root().unwrap_or(".".to_string());

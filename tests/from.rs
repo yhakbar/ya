@@ -46,4 +46,17 @@ mod from {
 
         Ok(())
     }
+
+    /// This test is ignored by default because it requires an installed `ya` binary to be accessible in PATH.
+    #[test]
+    #[ignore]
+    fn chained() -> Result<()> {
+        ya().args(["call"])
+            .current_dir("examples/from/chained")
+            .assert()
+            .success()
+            .stdout("Done\n");
+
+        Ok(())
+    }
 }

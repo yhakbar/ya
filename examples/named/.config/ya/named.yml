@@ -1,0 +1,6 @@
+run: |
+  echo "Running the test."
+  ya test
+
+test: |
+  echo "Test passed."

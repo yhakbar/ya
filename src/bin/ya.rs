@@ -30,6 +30,7 @@ fn main() -> anyhow::Result<()> {
             &RunCommandFlags {
                 execution: args.execution,
                 quiet: args.quiet,
+                config: config_path,
             },
             args.extra_args.as_slice(),
         )?

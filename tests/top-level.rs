@@ -9,6 +9,7 @@ mod top_level {
     #[test]
     fn top_level() -> Result<()> {
         ya().args(["run"])
+            .env_clear()
             .current_dir("examples/top-level")
             .assert()
             .success()
