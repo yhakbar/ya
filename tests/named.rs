@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod top_level {
+mod named {
     use anyhow::Result;
     use assert_cmd::Command;
     fn ya() -> Command {
@@ -7,13 +7,12 @@ mod top_level {
     }
 
     #[test]
-    fn top_level() -> Result<()> {
-        ya().args(["run"])
-            .env_clear()
-            .current_dir("examples/top-level")
+    fn named() -> Result<()> {
+        ya().args([ "-c", ".config/ya/named.yml", "run"])
+            .current_dir("examples/named")
             .assert()
             .success()
-            .stdout("This file is not in a .config directory!\n");
+            .stdout("Running the test.\nTest passed.\n");
 
         Ok(())
     }

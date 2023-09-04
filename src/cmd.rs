@@ -31,6 +31,7 @@ pub fn run_command_from_config(
 pub struct RunCommandFlags {
     pub execution: bool,
     pub quiet: bool,
+    pub config: PathBuf,
 }
 
 trait Printable {
@@ -57,13 +58,16 @@ impl Runnable for SimpleCommand {
         if run_command_flags.execution {
             self.print_execution(extra_args);
         }
+
         let prog = DEFAULT_PROG.to_string();
-        let mut command = Command::new(prog);
-        let command = command
+
+        let result = Command::new(prog)
+            .env("YA_CONFIG", run_command_flags.config.to_str().unwrap_or(""))
             .args(DEFAULT_ARGS.to_vec())
             .arg(self)
-            .args(extra_args);
-        let result = command.spawn()?.wait()?;
+            .args(extra_args)
+            .spawn()?.wait()?;
+
         if !result.success() {
             std::process::exit(result.code().unwrap_or(1));
         }
@@ -97,7 +101,9 @@ impl Runnable for FullCommand {
 
         let mut command = Command::new(prog);
 
-        command.args(self.args.as_slice());
+        command
+            .env("YA_CONFIG", run_command_flags.config.to_str().unwrap_or(""))
+            .args(self.args.as_slice());
 
         if let Some(cmd) = cmd {
             command.arg(cmd);
@@ -144,8 +150,12 @@ impl Runnable for FromCommand {
         let from_config = parse_config_from_file(from_path_buff.as_path())?;
         let command_name = &self.cmd;
 
+
+
         let recursion_depth = std::env::var("__YA_RECURSION_DEPTH").unwrap_or("0".to_string()).parse::<u64>().unwrap_or(0);
         std::env::set_var("__YA_RECURSION_DEPTH", (recursion_depth + 1).to_string());
+
+        std::env::set_var("YA_CONFIG", from_path_buff.to_str().unwrap_or(""));
 
         run_command_from_config(
             &from_config,

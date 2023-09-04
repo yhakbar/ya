@@ -3,18 +3,23 @@ ensure_sd: |
     cargo install --locked sd
   fi
 
-ensure_rg: |
-  if ! command -v rg >/dev/null; then
-    cargo install --locked ripgrep
-  fi
+commit_update: |
+  set -euo pipefail
+
+  new_version="${0:?missing required positional parameter 'new_version'}"
+
+  git add Cargo.toml Cargo.lock
+  git commit -m "Bump version to $new_version"
+  git tag -a "$new_version" -m "Tag $new_version"
+  git push --follow-tags
+
 
 release_patch:
   chdir: $GIT_ROOT
   cmd: |
     set -euo pipefail
 
-    ya -c .config/ya/tag.yml ensure_sd
-    ya -c .config/ya/tag.yml ensure_rg
+    ya ensure_sd
 
     version=$(cargo pkgid | sd '^.*#([^ ]+)$' '$1')
     major=$(echo "$version" | sd '^([0-9]+)\.[0-9]+\.[0-9]+$' '$1')
@@ -25,18 +30,14 @@ release_patch:
     sd '^version = "[0-9]+\.[0-9]+\.[0-9]+"$' "version = \"$new_version\"" Cargo.toml
     cargo update
 
-    git add Cargo.toml Cargo.lock
-    git commit -m "Bump version to $new_version"
-    git tag -a "$new_version" -m "Tag $new_version"
-    git push --follow-tags
+    ya commit_update "$new_version"
 
 release_minor:
   chdir: $GIT_ROOT
   cmd: |
     set -euo pipefail
 
-    ya -c .config/ya/tag.yml ensure_sd
-    ya -c .config/ya/tag.yml ensure_rg
+    ya ensure_sd
 
     version=$(cargo pkgid | sd '^.*#([^ ]+)$' '$1')
     major=$(echo "$version" | sd '^([0-9]+)\.[0-9]+\.[0-9]+$' '$1')
@@ -47,18 +48,14 @@ release_minor:
     sd '^version = "[0-9]+\.[0-9]+\.[0-9]+"$' "version = \"$new_version\"" Cargo.toml
     cargo update
 
-    git add Cargo.toml Cargo.lock
-    git commit -m "Bump version to $new_version"
-    git tag -a "$new_version" -m "Tag $new_version"
-    git push --follow-tags
+    ya commit_update "$new_version"
 
 release_major:
   chdir: $GIT_ROOT
   cmd: |
     set -euo pipefail
 
-    ya -c .config/ya/tag.yml ensure_sd
-    ya -c .config/ya/tag.yml ensure_rg
+    ya ensure_sd
 
     version=$(cargo pkgid | sd '^.*#([^ ]+)$' '$1')
     major=$(echo "$version" | sd '^([0-9]+)\.[0-9]+\.[0-9]+$' '$1')
@@ -69,7 +66,4 @@ release_major:
     sd '^version = "[0-9]+\.[0-9]+\.[0-9]+"$' "version = \"$new_version\"" Cargo.toml
     cargo update
 
-    git add Cargo.toml Cargo.lock
-    git commit -m "Bump version to $new_version"
-    git tag -a "$new_version" -m "Tag $new_version"
-    git push --follow-tags
+    ya commit_update "$new_version"

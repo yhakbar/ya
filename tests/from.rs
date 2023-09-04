@@ -46,4 +46,15 @@ mod from {
 
         Ok(())
     }
+
+    #[test]
+    fn chained() -> Result<()> {
+        ya().args(["call"])
+            .current_dir("examples/from/chained")
+            .assert()
+            .success()
+            .stdout("Done\n");
+
+        Ok(())
+    }
 }

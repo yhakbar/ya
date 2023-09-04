@@ -1,0 +1,2 @@
+call: ya -c .config/ya/chained.yml run
+
