@@ -1,8 +1,6 @@
 python_repl: python3
 
 python_script:
-  pre_msg: This is a python script
-  post_msg: That was a python script
   prog: python3
   args: [-c]
   cmd: |

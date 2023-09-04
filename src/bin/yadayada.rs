@@ -8,10 +8,15 @@ use std::{
     path::PathBuf,
 };
 use ya::{
-    cli::{ya::YaArgs, yadayada::{YadaYadaArgs, YadaYadaSubcommand, TemplateSubcommand}},
+    cli::{ya::YaArgs, yadayada::{YadaYadaArgs, YadaYadaSubcommand}},
     completion::build_fish_completion,
     config::get_config_path,
-    template::{list_templates, save_template, stamp_template},
+};
+
+#[cfg(feature = "templating")]
+use ya::{
+    cli::yadayada::TemplateSubcommand,
+    template::{list_templates, save_template, stamp_template}
 };
 
 fn main() -> anyhow::Result<()> {
@@ -100,6 +105,7 @@ fn main() -> anyhow::Result<()> {
                     _ => return Ok(()),
                 }
             }
+            #[cfg(feature = "templating")]
             YadaYadaSubcommand::Template { subcommand } => {
                 if let Some(subcommand) = subcommand {
                     match subcommand {

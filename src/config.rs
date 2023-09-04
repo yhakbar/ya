@@ -1,30 +1,36 @@
+use colored::Colorize;
+use serde_yaml::Mapping;
 use serde_yaml::Value;
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 use std::path::PathBuf;
 
+use crate::cmd::RunCommandFlags;
 use crate::git::get_git_root;
 
-const DEFAULT_CONFIG_PATHS: [&str; 4] = ["ya.yml", "ya.yaml", ".config/ya.yml", ".config/ya.yaml"];
+const DEFAULT_CONFIG_NAMES: [&str; 2] = ["ya.yml", "ya.yaml"];
+const DEFAULT_CONFIG_LOCATIONS: [&str; 3] = [".", ".config", "$GIT_ROOT/.config"];
+
+pub const DEFAULT_PROG: &str = "bash";
+pub const DEFAULT_ARGS: &[&str] = &["-c"];
 
 pub fn get_config_path(path: &Option<PathBuf>) -> anyhow::Result<PathBuf> {
     let path = match path {
         Some(path) => path,
         None => {
-            for config_path in DEFAULT_CONFIG_PATHS.iter() {
-                let path = Path::new(config_path);
-                if path.exists() && path.is_file() {
-                    return Ok(path.to_path_buf());
-                }
-            }
-
-            let git_root = get_git_root();
-            if let Ok(git_root) = git_root {
-                for config_path in DEFAULT_CONFIG_PATHS.iter() {
-                    let path = Path::new(&git_root).join(config_path);
+            for config_location in DEFAULT_CONFIG_LOCATIONS.iter() {
+                let config_location = if config_location.starts_with("$GIT_ROOT") {
+                    let git_root = get_git_root().unwrap_or(".".to_string());
+                    config_location.replace("$GIT_ROOT", &git_root)
+                } else {
+                    config_location.to_string()
+                };
+                for config_name in DEFAULT_CONFIG_NAMES.iter() {
+                    let path = Path::new(&config_location).join(config_name);
                     if path.exists() && path.is_file() {
-                        return Ok(path);
+                        return Ok(path.to_path_buf());
                     }
                 }
             }
@@ -39,12 +45,10 @@ pub fn get_config_path(path: &Option<PathBuf>) -> anyhow::Result<PathBuf> {
 
 pub fn resolve_chdir(chdir: String) -> anyhow::Result<String> {
     if chdir.starts_with("$GIT_ROOT") {
-        let git_root = get_git_root();
-        if let Ok(git_root) = git_root {
-            let git_root = git_root.trim();
-            let chdir = chdir.replace("$GIT_ROOT", git_root);
-            return Ok(chdir);
-        }
+        let git_root = get_git_root()?;
+        let git_root = git_root.trim();
+        let chdir = chdir.replace("$GIT_ROOT", git_root);
+        return Ok(chdir);
     }
 
     Ok(chdir)
@@ -63,204 +67,242 @@ pub fn print_config_from_file(path: &Path) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub struct ParsedConfig {
-    pub parsed_command: CommandType,
-    pub pre_msg: Option<String>,
-    pub post_msg: Option<String>,
-    pub pre_cmds: Option<Vec<String>>,
-    pub post_cmds: Option<Vec<String>>,
-    pub chdir: Option<String>,
-    pub from: Option<String>,
+pub trait Validatable {
+    fn validate(&self, m: Mapping, run_command_flags: &RunCommandFlags);
 }
+
+pub type SimpleCommand = String;
 
 pub struct FullCommand {
     pub prog: String,
     pub args: Vec<String>,
     pub cmd: Option<String>,
+    pub chdir: Option<String>,
 }
 
-pub enum CommandType {
-    SimpleCommand(String),
-    FullCommand(FullCommand),
-    None,
-}
+impl Validatable for FullCommand {
+    fn validate(&self, m: Mapping, run_command_flags: &RunCommandFlags) {
+        if ! run_command_flags.quiet {
+            let keys = m.keys().filter(|k| {
+                let k = k.as_str().unwrap_or("");
+                k != "prog" && k != "args" && k != "cmd" && k != "chdir"
+            }).collect::<Vec<_>>();
 
-impl std::fmt::Display for FullCommand {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let mut display = self.prog.clone();
-        for arg in self.args.iter() {
-            display.push_str(&format!(" {}", arg));
+            if ! keys.is_empty() {
+                let keys = keys.iter().map(|k| k.as_str().unwrap_or("")).collect::<Vec<_>>().join(", ").red();
+                eprintln!("{}: Ignoring invalid keys for a full command: {}", "Warning".bright_yellow().bold(), keys);
+            }
         }
-        if let Some(cmd) = &self.cmd {
-            display.push_str(&format!(" '{}'", cmd));
-        }
-        write!(f, "{}", display)
     }
 }
 
-pub fn parse_cmd(cmd: &Value) -> anyhow::Result<ParsedConfig> {
-    const DEFAULT_PROG_VALUE: &str = "bash";
-    const DEFAULT_ARGS_VALUE: &[&str] = &["-c"];
+impl TryFrom<serde_yaml::Mapping> for FullCommand {
+    type Error = anyhow::Error;
 
-    let default_prog: Value = Value::String(DEFAULT_PROG_VALUE.to_string());
-    let default_args: Value = Value::Sequence(
-        DEFAULT_ARGS_VALUE
-            .iter()
-            .map(|s| Value::String(s.to_string()))
-            .collect(),
-    );
+    fn try_from(m: serde_yaml::Mapping) -> anyhow::Result<FullCommand> {
+        let mapping_prog = m.get("prog");
+        let mapping_args = m.get("args");
+        let mapping_cmd = m.get("cmd");
+        let mapping_chdir = m.get("chdir");
 
-    match cmd {
-        Value::String(s) => Ok(ParsedConfig {
-            parsed_command: CommandType::SimpleCommand(s.to_string()),
-            pre_msg: None,
-            post_msg: None,
-            pre_cmds: None,
-            post_cmds: None,
-            chdir: None,
-            from: None,
-        }),
-        Value::Mapping(m) => {
-            let config_prog = m.get("prog");
+        let prog = match mapping_prog {
+            Some(prog) =>
+                prog.as_str()
+                    .ok_or(anyhow::anyhow!("Invalid FullCommand: `prog` is not a string"))?
+                    .to_string(),
+            None => DEFAULT_PROG.to_string(),
+        };
 
-            let args_if_empty = match config_prog {
-                Some(_) => Value::Sequence(vec![]),
-                None => default_args,
-            };
-
-            let prog = config_prog
-                .unwrap_or(&default_prog)
-                .as_str()
-                .ok_or(anyhow::anyhow!("Invalid Config: `prog` is not a string"))?;
-
-            let args = m
-                .get("args")
-                .unwrap_or(&args_if_empty)
+        let args = match mapping_args {
+            Some(args) => args
                 .as_sequence()
-                .ok_or(anyhow::anyhow!("Invalid Config: `args` is not a sequence"))?
+                .ok_or(anyhow::anyhow!("Invalid FullCommand: `args` is not a sequence"))?
                 .iter()
                 .map(|a| {
                     a.as_str()
                         .ok_or(anyhow::anyhow!(
-                            "Invalid Config: `arg` is not a string: {:?}",
+                            "Invalid FullCommand: `arg` is not a string: {:?}",
                             a
                         ))
                         .map(|s| s.to_string())
                 })
-                .collect::<anyhow::Result<Vec<String>>>()?;
+                .collect::<anyhow::Result<Vec<String>>>()?,
+            None => DEFAULT_ARGS.iter().map(|s| s.to_string()).collect(),
+        };
 
-            let cmd = m
-                .get("cmd")
-                .map(|v| {
-                    v.as_str()
-                        .ok_or(anyhow::anyhow!("Invalid Config: `cmd` is not a string"))
-                })
-                .transpose()?;
+        let cmd = match mapping_cmd {
+            Some(cmd) => Some(
+                cmd.as_str()
+                    .ok_or(anyhow::anyhow!("Invalid FromCommand: `cmd` is not a string"))?
+                    .to_string(),
+            ),
+            None => None,
+        };
 
-            let pre_msg = m
-                .get("pre_msg")
-                .map(|v| {
-                    v.as_str()
-                        .ok_or(anyhow::anyhow!("Invalid Config: `pre_msg` is not a string"))
-                })
-                .transpose()?;
-            let post_msg = m
-                .get("post_msg")
-                .map(|v| {
-                    v.as_str().ok_or(anyhow::anyhow!(
-                        "Invalid Config: `post_msg` is not a string"
-                    ))
-                })
-                .transpose()?;
-
-            let pre_cmds = m
-                .get("pre_cmds")
-                .map(|v| {
-                    v.as_sequence().ok_or(anyhow::anyhow!(
-                        "Invalid Config: `pre_cmds` is not a sequence"
-                    ))
-                })
-                .transpose()?;
-            let pre_cmds = pre_cmds
-                .map(|v| {
-                    v.iter()
-                        .map(|v| {
-                            v.as_str().ok_or(anyhow::anyhow!(
-                                "Invalid Config: pre_cmd is not a string: {:?}",
-                                v
-                            ))
-                        })
-                        .collect::<anyhow::Result<Vec<&str>>>()
-                        .map(|v| v.iter().map(|s| s.to_string()).collect())
-                })
-                .transpose()?;
-
-            let post_cmds = m
-                .get("post_cmds")
-                .map(|v| {
-                    v.as_sequence().ok_or(anyhow::anyhow!(
-                        "Invalid Config: `post_cmds` is not a sequence"
-                    ))
-                })
-                .transpose()?;
-            let post_cmds = post_cmds
-                .map(|v| {
-                    v.iter()
-                        .map(|v| {
-                            v.as_str().ok_or(anyhow::anyhow!(
-                                "Invalid Config: `post_cmd` is not a string: {:?}",
-                                v
-                            ))
-                        })
-                        .collect::<anyhow::Result<Vec<&str>>>()
-                        .map(|v| v.iter().map(|s| s.to_string()).collect())
-                })
-                .transpose()?;
-
-            let chdir = m
-                .get("chdir")
-                .map(|v| {
-                    v.as_str()
-                        .ok_or(anyhow::anyhow!("Invalid Config: `chdir` is not a string"))
-                })
-                .transpose()?;
-
-            let from = m
-                .get("from")
-                .map(|v| {
-                    v.as_str()
-                        .ok_or(anyhow::anyhow!("Invalid Config: `from` is not a string"))
-                })
-                .transpose()?;
-
-            if let Some(from) = from {
-                return Ok(ParsedConfig {
-                    parsed_command: CommandType::None,
-                    pre_msg: None,
-                    post_msg: None,
-                    pre_cmds: None,
-                    post_cmds: None,
-                    chdir: None,
-                    from: Some(from.to_string()),
-                });
-            }
-
-            Ok(ParsedConfig {
-                parsed_command: CommandType::FullCommand(FullCommand {
-                    prog: prog.to_string(),
-                    args,
-                    cmd: cmd.map(|s| s.to_string()),
-                }),
-                pre_msg: pre_msg.map(|s| s.to_string()),
-                post_msg: post_msg.map(|s| s.to_string()),
-                pre_cmds,
-                post_cmds,
-                chdir: chdir.map(|s| s.to_string()),
-                from: from.map(|s| s.to_string()),
+        let chdir = mapping_chdir
+            .map(|v| {
+                v.as_str()
+                    .ok_or(anyhow::anyhow!("Invalid FullCommand: `chdir` is not a string"))
             })
+            .transpose()?;
+
+
+        Ok(FullCommand {
+            prog,
+            args,
+            cmd,
+            chdir: chdir.map(|s| s.to_string()),
+        })
+    }
+}
+
+pub struct SubCommands(pub HashMap<String, Command>);
+
+impl Validatable for SubCommands {
+    fn validate(&self, m: Mapping, run_command_flags: &RunCommandFlags) {
+        if ! run_command_flags.quiet {
+            let keys = m.keys().filter(|k| {
+                let k = k.as_str().unwrap_or("");
+                k != "sub"
+            }).collect::<Vec<_>>();
+
+            if ! keys.is_empty() {
+                let keys = keys.iter().map(|k| k.as_str().unwrap_or("")).collect::<Vec<_>>().join(", ").red();
+                eprintln!("{}: Ignoring invalid keys for sub commands: {}", "Warning".bright_yellow().bold(), keys);
+            }
         }
-        _ => Err(anyhow::anyhow!(
-            "Command is not a string, or a valid yaml configuration for a command."
-        )),
+    }
+}
+
+struct SubCommandsInput<'a> {
+    pub m: Mapping,
+    pub run_command_flags: &'a RunCommandFlags,
+}
+
+impl TryFrom<SubCommandsInput<'_>> for SubCommands {
+    type Error = anyhow::Error;
+
+    fn try_from(input: SubCommandsInput) -> anyhow::Result<SubCommands> {
+        if let Some(sub) = input.m.get("sub") {
+            if let Some(sub) = sub.as_mapping() {
+                let mut commands = HashMap::new();
+
+                for (k, v) in sub.iter() {
+                    let k = k
+                        .as_str()
+                        .ok_or(anyhow::anyhow!(
+                            "Invalid SubCommands: key is not a string"
+                        ))?
+                        .to_string();
+
+                    let v = Command::try_from(CommandInput{ v: v.clone(), command_name: k.clone(), run_command_flags: input.run_command_flags })?;
+
+                    commands.insert(k, v);
+                }
+
+                return Ok(SubCommands(commands));
+            }
+        }
+
+        Err(anyhow::anyhow!(
+            "Command is an invalid yaml configuration for a subcommand."
+        ))
+    }
+}
+
+pub struct FromCommand {
+    pub from: String,
+    pub cmd: String,
+}
+
+pub struct FromCommandInput {
+    pub m: serde_yaml::Mapping,
+    pub command_name: String,
+}
+
+impl Validatable for FromCommand {
+    fn validate(&self, m: Mapping, run_command_flags: &RunCommandFlags) {
+        if ! run_command_flags.quiet {
+            let keys = m.keys().filter(|k| {
+                let k = k.as_str().unwrap_or("");
+                k != "from" && k != "cmd"
+            }).collect::<Vec<_>>();
+
+            if !keys.is_empty() {
+                let keys = keys.iter().map(|k| k.as_str().unwrap_or("")).collect::<Vec<_>>().join(", ").red();
+                eprintln!("{}: Ignoring invalid keys for a from command: {}", "Warning".bright_yellow().bold(), keys);
+            }
+        }
+    }
+}
+
+impl TryFrom<FromCommandInput> for FromCommand {
+    type Error = anyhow::Error;
+
+    fn try_from(input: FromCommandInput) -> anyhow::Result<FromCommand> {
+        let from = input.m
+            .get("from")
+            .ok_or(anyhow::anyhow!("Invalid FromCommand: `from` not found"))?
+            .as_str()
+            .ok_or(anyhow::anyhow!("Invalid FromCommand: `from` is not a string"))?
+            .to_string();
+
+        let mapping_cmd = input.m.get("cmd");
+
+        let cmd = match mapping_cmd {
+            Some(cmd) =>
+                cmd.as_str()
+                    .ok_or(anyhow::anyhow!("Invalid FromCommand: `cmd` is not a string"))?
+                    .to_string(),
+            None => input.command_name,
+        };
+
+        Ok(FromCommand { from, cmd })
+    }
+}
+
+pub enum Command {
+    SimpleCommand(SimpleCommand),
+    FullCommand(FullCommand),
+    SubCommands(SubCommands),
+    FromCommand(FromCommand),
+}
+
+pub struct CommandInput<'a> {
+    pub v: Value,
+    pub command_name: String,
+    pub run_command_flags: &'a RunCommandFlags,
+}
+
+impl TryFrom<CommandInput<'_>> for Command {
+    type Error = anyhow::Error;
+
+    fn try_from(input: CommandInput) -> anyhow::Result<Command> {
+        match input.v {
+            Value::String(s) => Ok(Command::SimpleCommand(s.to_string())),
+            Value::Mapping(m) => {
+                if let Ok(from_command) = FromCommand::try_from(FromCommandInput{ m: m.clone(), command_name: input.command_name.clone() }) {
+                    from_command.validate(m, input.run_command_flags);
+                    return Ok(Command::FromCommand(from_command));
+                }
+
+                if let Ok(sub_command) = SubCommands::try_from(SubCommandsInput{ m: m.clone(), run_command_flags: input.run_command_flags }) {
+                    sub_command.validate(m, input.run_command_flags);
+                    return Ok(Command::SubCommands(sub_command));
+                }
+
+                if let Ok(full_command) = FullCommand::try_from(m.clone()) {
+                    full_command.validate(m, input.run_command_flags);
+                    return Ok(Command::FullCommand(full_command));
+                }
+
+                Err(anyhow::anyhow!(
+                    "Command is an invalid yaml configuration for a command."
+                ))
+            }
+            _ => Err(anyhow::anyhow!(
+                "Command is not a string, or a valid yaml configuration for a command."
+            )),
+        }
     }
 }

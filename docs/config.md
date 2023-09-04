@@ -3,34 +3,57 @@
 ## Spec
 
 ```yml
-command_as_string: String
+simple_command: String
 
-command_as_mapping:
+full_command:
   prog: String
-  args: Optional List of Strings
+  args: List of Strings
+  cmd: Optional String
+  chdir: Optional String
+
+from_command:
+  from: String
   cmd: Optional String
 
-  pre_cmds: Optional List of Strings
-  post_cmds: Optional List of Strings
-
-  pre_msg: Optional String
-  post_msg: Optional String
-
-  chdir: Optional String
-  from: Optional String
+sub_commands:
+  sub:
+    simple_sub_command: String
+    from_sub_command:
+      from: String
+      cmd: Optional String
+    full_sub_command:
+      prog: String
+      args: Optional List of Strings
+      cmd: Optional String
+      chdir: Optional String
+    sub_sub_commands:
+      sub:
+        simple_sub_sub_command: String
 ```
 
-- `command_as_string` is a string that will be run as a command. This is equivalent to `command_as_mapping` with `prog` set to `bash`, `args` set to `-c` and `cmd` set to the value.
-- `command_as_mapping` is a mapping defining multiple configurations for a command.
-  - `prog` is the program to run.
-  - `args` is a list of arguments to pass to the program.
-  - `cmd` is the command to run.
-  - `pre_cmds` is a list of commands found in the config to run before the command.
-  - `post_cmds` is a list of commands found in the config to run after the command.
-  - `pre_msg` is a message to print before running the command.
-  - `post_msg` is a message to print after running the command.
-  - `chdir` is the directory to change to before running the command.
+Each command above represents a different way to define a command in a `ya` config file.
+
+### Simple Commands
+
+- `simple_command` is a string that will be run as a command. This is equivalent to `full_command` with `prog` set to `bash`, `args` set to `["-c"]` and `cmd` set to the value of the string.
+
+### Full Commands
+
+- `full_command` is a mapping defining multiple configurations for a command.
+  - `chdir` is the optional directory to change to before running the command.
+  - `prog` is the program to run. Default: `bash`.
+  - `args` is a list of arguments to pass to the program. Default: `["-c"]`. Can be set to `[]` to pass no arguments.
+  - `cmd` is the optional command to run. To be added to the command after the program and arguments.
+
+### From Commands
+
+- `from_command` is a mapping defining a command to run from another config file.
   - `from` is a configuration file to use instead of the current one for a given command.
+  - `cmd` is the optional selection of a specific command in the `from` config file. By default this is the command being run.
+
+### Sub Commands
+
+- `sub_commands` is a mapping with a key of `sub` that defines multiple subcommands. Each of the commands defined in the `sub` mapping can be defined in the same way as the root commands for the config file. Simple Commands, Full Commands, From Commands, and Sub Commands can all be defined in the `sub` mapping.
 
 ## Config File Precedence
 
@@ -45,19 +68,19 @@ Ya will look for a config file in the following locations, in order:
 - `$GIT_ROOT/.config/ya.yml`
 - `$GIT_ROOT/.config/ya.yaml`
 
-Where `$GIT_ROOT` is the root of the git repository that the current directory is in.
+Where `$GIT_ROOT` is the root of the git repository that the current directory is in, if it is in one.
 
-Note that although the highest precedence config file is the one in the current directory, I recommend tucking your config file into the `.config` directory for repository configurations. This reduces clutter in your repo and allows you to quickly override the config file by creating a temporary config in the current directory.
+Note that although the highest precedence config file is the one in the current directory, I recommend tucking your config file into a `.config` directory when you can. This reduces clutter in your repo and allows you to quickly override the config file by creating a temporary config in the current directory.
 
-You can also specify a config file to use explicitly with the `-c`/`--config` flag.
+You can also explicitly specify a config file with the `-c`/`--config` flag.
 
-## Building Your Own Config
+## Building a Config
 
 Ya does not come with any default commands. You must build your own config file to use it. The config file is a YAML file that contains a mapping of commands to run. The keys are the names of commands and the values are the commands to run.
 
 Example config files can be found in the [examples](/examples) directory.
 
-### Single Commands
+### Simple Commands Cont’d
 
 The simplest config file would look something like this:
 
@@ -65,7 +88,7 @@ The simplest config file would look something like this:
 run: echo "Hey ya!"
 ```
 
-It's a single key called `run` with a value of `echo "Hey ya!"`. By default, `ya` will run the command `bash -c` followed by the value of a key in the config file. In this case, the following invocation of `ya`:
+It's a simple command called `run` with a value of `echo "Hey ya!"`. By default, `ya` will run the command `bash -c` followed by the value of a key in the config file. In this case, the following invocation of `ya`:
 
 ```bash
 ❯ ya run
@@ -92,6 +115,55 @@ run: |
   echo "script"
 ```
 
+```bash
+❯ ya run
+This
+is
+a
+multi-line
+script
+```
+
+### Full Commands Cont’d
+
+The full configurations that are available to a command provide more flexibility. For example, you might want to run a command that has multiple arguments. You can do that like so:
+
+```yml
+install:
+  prog: cargo
+  args: ["install", "--path", "."]
+```
+
+This avoids the overhead of calling `bash -c` and allows for usage of `chdir`, which will be covered later.
+
+### Extra Arguments
+
+When using either the simple command or the full command, you can pass extra arguments to the command by passing them after the command name. For example, you might want to define a command with standard flags that should be used every time, but decide to add an extra flag for a specific invocation.
+
+For example, an extra argument can be passed to the previous command like so:
+
+```bash
+❯ ya -x install --force
+$ cargo install --path . --force
+...
+```
+
+The `-x` flag here is just being used to show the command that is being run. It is not required to pass extra arguments.
+
+This feature also allows for parameterized commands, using the relevant logic in the program being run to extract argument values.
+
+e.g. in bash:
+
+```yml
+run: |
+  echo "The value: '$0' is passed to the command"
+```
+
+```bash
+❯ ya run "parameterized value"
+The value: 'parameterized value' is passed to the command
+```
+
 ### Interactive Commands
 
 You might also want to save a command that you would like to run interactively. For example, you might want to save a command that starts up a Docker container, and connects you to the shell that starts up in that container. You can do that like so:
@@ -107,57 +179,14 @@ To use this config, you would run a command similar to the previous example:
 
 ```bash
 ❯ ya docker_shell
-root@495b1451aeb5:/#
+root@container-id:/#
 ```
 
 This is equivalent to running the following command:
 
 ```bash
 ❯ docker run -it --rm ubuntu
-root@495b1451aeb5:/#
-```
-
-### Pre and Post Commands
-
-You can also specify commands to run before and/or after a given command. For example, you might want to run your linter before you run your tests. You can do that like so:
-
-```yml
-lint:
-  prog: cargo
-  args: ["clippy", "--all-targets", "--all-features", "--", "-D", "warnings"]
-
-test:
-  prog: cargo
-  args: ["test", "--all-targets", "--all-features"]
-  pre_cmds:
-    - lint
-```
-
-Note that if any command exits with a non-zero exit code, the entire command will exit with a non-zero exit code and exit early. In this example, if your linter fails, your tests will not run.
-
-### Pre and Post Messages
-
-You can also specify messages to print before and/or after the command you specify. For example, you might want to print a message before you run your tests. You can do that like so:
-
-```yml
-test_difficult_stuff:
-  cmd: "echo Testing difficult stuff..."
-  pre_msg: ">>> Running tests..."
-  post_msg: ">>> Tests finished!"
-```
-
-```bash
-❯ ya test_difficult_stuff
->>> Running tests...
-Testing difficult stuff...
->>> Tests finished!
-```
-
-Note that you can use the `-q`/`quiet` flag to suppress the output of `pre_msg` and `post_msg`:
-
-```bash
-❯ ya -q test_difficult_stuff
-Testing difficult stuff...
+root@container-id:/#
 ```
 
 ### Chdir
@@ -171,7 +200,9 @@ install:
   chdir: $GIT_ROOT
 ```
 
-The value of `chdir` can be any valid path. It can be an absolute path, a relative path, or a path relative to the root of the git repository that the current directory is in. You can use the `$GIT_ROOT` variable to refer to the root of the git repository that the current directory is in.
+The value of `chdir` can be any valid path. It can be an absolute path, a relative path, or a path relative to the root of the git repository that the current directory is in.
+
+You can use the special `$GIT_ROOT` variable to refer to the root of the git repository that the current directory is in.
 
 ### From
 
@@ -194,3 +225,32 @@ lint:
 # Within the subdirectory
 ❯ ya lint
 ```
+
+By default, `from` will use the name of the calling command as the command to run in the target configuration (in this example, `lint` being used in `subdirectory` results in the `lint` command being called in the root `.config/ya.yml` file). You can override this behavior by specifying a `cmd` key in the command definition.
+
+```yml
+# subdirectory/.config/ya.yml
+also_lints:
+  from: $GIT_ROOT/.config/ya.yml
+  cmd: lint
+```
+
+### Sub Commands Cont’d
+
+You can also create subcommands of a command. For example, you might have three different ways that you can release, but want to define them all as part of the same command. You can do that like so:
+
+```yml
+release:
+  sub:
+    patch:
+      from: $GIT_ROOT/.config/ya/tag.yml
+      cmd: release_patch
+    minor:
+      from: $GIT_ROOT/.config/ya/tag.yml
+      cmd: release_minor
+    major:
+      from: $GIT_ROOT/.config/ya/tag.yml
+      cmd: release_major
+```
+
+Note that subcommands can be defined as any valid command that `ya` supports, including other subcommands.

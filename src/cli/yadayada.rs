@@ -93,6 +93,7 @@ pub enum YadaYadaSubcommand {
         command: String,
     },
 
+    #[cfg(feature = "templating")]
     /// Manage templates.
     #[command(about, alias = "t", arg_required_else_help(true))]
     Template {

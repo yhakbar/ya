@@ -1,3 +1,4 @@
+#[cfg(feature = "yadayada")]
 #[cfg(test)]
 mod template {
     use anyhow::Result;

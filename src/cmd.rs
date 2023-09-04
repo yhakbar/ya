@@ -3,55 +3,75 @@ use serde_yaml::Value;
 use std::{path::PathBuf, process::Command};
 
 use crate::config::{
-    parse_cmd, parse_config_from_file, resolve_chdir, CommandType, FullCommand, ParsedConfig,
+    parse_config_from_file, resolve_chdir, FullCommand, Command as ConfigCommand, CommandInput,
+    DEFAULT_PROG, DEFAULT_ARGS, SimpleCommand, SubCommands, FromCommand,
 };
 
-const FROM_RECURSION_LIMIT: u64 = 10;
+const DEFAULT_RECURSION_LIMIT: u64 = 10;
 
 pub fn run_command_from_config(
     config: &Value,
     command_name: &str,
     run_command_flags: &RunCommandFlags,
     extra_args: &[String],
-    recursion_depth: u64,
 ) -> anyhow::Result<()> {
     let command_name = command_name;
     let cmd = config.get(command_name).ok_or(anyhow::anyhow!(
         "Command {} not found in config",
         command_name
     ))?;
+    let command = ConfigCommand::try_from(CommandInput{ v: cmd.clone(), command_name: command_name.to_string(), run_command_flags })?;
     run_command(
-        config,
-        command_name,
-        cmd,
+        &command,
         run_command_flags,
         extra_args,
-        recursion_depth,
     )
 }
 
-fn get_full_command_from_parsed_command(parsed_command: CommandType) -> Option<FullCommand> {
-    match parsed_command {
-        CommandType::SimpleCommand(cmd) => Some(FullCommand {
-            prog: "bash".to_string(),
-            args: vec!["-c".to_string()],
-            cmd: Some(cmd),
-        }),
-        CommandType::FullCommand(cmd) => Some(cmd),
-        CommandType::None => None,
-    }
-}
-
 pub struct RunCommandFlags {
-    pub quiet: bool,
     pub execution: bool,
+    pub quiet: bool,
 }
 
-trait PrintExecution {
+trait Printable {
     fn print_execution(&self, extra_args: &[String]);
 }
 
-impl PrintExecution for FullCommand {
+trait Runnable {
+    fn run(&self, run_command_flags: &RunCommandFlags, extra_args: &[String]) -> Result<(), anyhow::Error>;
+}
+
+impl Printable for SimpleCommand {
+    fn print_execution(&self, extra_args: &[String]) {
+        let mut parsed_command = format!("$ bash -c '{}'", self);
+        for arg in extra_args {
+            parsed_command.push_str(&format!(" {}", arg));
+        }
+        parsed_command = parsed_command.blue().bold().to_string();
+        println!("{}", parsed_command);
+    }
+}
+
+impl Runnable for SimpleCommand {
+    fn run(&self, run_command_flags: &RunCommandFlags, extra_args: &[String]) -> Result<(), anyhow::Error> {
+        if run_command_flags.execution {
+            self.print_execution(extra_args);
+        }
+        let prog = DEFAULT_PROG.to_string();
+        let mut command = Command::new(prog);
+        let command = command
+            .args(DEFAULT_ARGS.to_vec())
+            .arg(self)
+            .args(extra_args);
+        let result = command.spawn()?.wait()?;
+        if !result.success() {
+            std::process::exit(result.code().unwrap_or(1));
+        }
+        Ok(())
+    }
+}
+
+impl Printable for FullCommand {
     fn print_execution(&self, extra_args: &[String]) {
         let mut parsed_command = format!("$ {} {}", self.prog, self.args.join(" "));
         if let Some(cmd) = &self.cmd {
@@ -65,114 +85,101 @@ impl PrintExecution for FullCommand {
     }
 }
 
-fn run_command(
-    config: &Value,
-    command_name: &str,
-    cmd: &Value,
-    run_command_flags: &RunCommandFlags,
-    extra_args: &[String],
-    recursion_depth: u64,
-) -> anyhow::Result<()> {
-    if (recursion_depth) >= FROM_RECURSION_LIMIT {
-        return Err(anyhow::anyhow!(
-            "Recursive command calls reached: {}",
-            FROM_RECURSION_LIMIT
-        ));
+impl Runnable for FullCommand {
+    fn run(&self, run_command_flags: &RunCommandFlags, extra_args: &[String]) -> Result<(), anyhow::Error> {
+        if run_command_flags.execution {
+            self.print_execution(extra_args);
+        }
+
+        let prog = &self.prog.clone();
+        let cmd = &self.cmd;
+        let chdir = &self.chdir;
+
+        let mut command = Command::new(prog);
+
+        command.args(self.args.as_slice());
+
+        if let Some(cmd) = cmd {
+            command.arg(cmd);
+        }
+
+        command.args(extra_args);
+
+        if let Some(chdir) = chdir {
+            let chdir = resolve_chdir(chdir.to_string())?;
+            command.current_dir(chdir);
+        }
+
+        let result = command.spawn()?.wait()?;
+
+        if !result.success() {
+            std::process::exit(result.code().unwrap_or(1));
+        }
+
+        Ok(())
     }
+}
 
-    let command = parse_cmd(cmd)?;
+impl Runnable for SubCommands {
+    fn run(&self, run_command_flags: &RunCommandFlags, extra_args: &[String]) -> Result<(), anyhow::Error> {
+        let subcommand_name = extra_args
+            .get(0)
+            .ok_or(anyhow::anyhow!("No subcommand provided"))?;
+        let SubCommands(subcommands) = self;
+        let subcommand = subcommands
+            .get(subcommand_name)
+            .ok_or(anyhow::anyhow!(
+                "Subcommand {} not found in config",
+                subcommand_name
+            ))?;
+        subcommand.run(run_command_flags, &extra_args[1..])
+    }
+}
 
-    let ParsedConfig {
-        parsed_command,
-        pre_msg,
-        post_msg,
-        pre_cmds,
-        post_cmds,
-        chdir,
-        from,
-    } = command;
-
-    let full_command_option = get_full_command_from_parsed_command(parsed_command);
-
-    let full_command;
-
-    if let Some(full_command_option) = full_command_option {
-        full_command = full_command_option;
-    } else if let Some(from) = from {
-        let from = resolve_chdir(from)?;
+impl Runnable for FromCommand {
+    fn run(&self, run_command_flags: &RunCommandFlags, extra_args: &[String]) -> Result<(), anyhow::Error> {
+        let from = &self.from;
+        let from = resolve_chdir(from.to_string())?;
         let from_path_buff = PathBuf::from(&from);
         let from_config = parse_config_from_file(from_path_buff.as_path())?;
+        let command_name = &self.cmd;
+
+        let recursion_depth = std::env::var("__YA_RECURSION_DEPTH").unwrap_or("0".to_string()).parse::<u64>().unwrap_or(0);
+        std::env::set_var("__YA_RECURSION_DEPTH", (recursion_depth + 1).to_string());
 
         run_command_from_config(
             &from_config,
             command_name,
             run_command_flags,
             extra_args,
-            recursion_depth + 1,
         )?;
-        return Ok(());
-    } else {
-        return Err(anyhow::anyhow!("You must provide one of: a string representing a command, a fully qualified command, or a `from` field"));
+        Ok(())
     }
+}
 
-    let FullCommand {
-        ref prog,
-        ref args,
-        ref cmd,
-    } = full_command;
-
-    let cmd = cmd.clone();
-
-    if let Some(pre_cmds) = pre_cmds {
-        for cmd in pre_cmds {
-            run_command_from_config(config, &cmd, run_command_flags, &[], recursion_depth + 1)?;
+impl Runnable for ConfigCommand {
+    fn run(&self, run_command_flags: &RunCommandFlags, extra_args: &[String]) -> Result<(), anyhow::Error> {
+        match self {
+            ConfigCommand::SimpleCommand(simple_cmd) => simple_cmd.run(run_command_flags, extra_args),
+            ConfigCommand::FullCommand(full_cmd) => full_cmd.run(run_command_flags, extra_args),
+            ConfigCommand::SubCommands(sub_cmds) => sub_cmds.run(run_command_flags, extra_args),
+            ConfigCommand::FromCommand(from_cmd) => from_cmd.run(run_command_flags, extra_args),
         }
     }
+}
 
-    if !run_command_flags.quiet {
-        if let Some(msg) = pre_msg {
-            println!("{}", msg);
-        }
+fn run_command(
+    command: &ConfigCommand,
+    run_command_flags: &RunCommandFlags,
+    extra_args: &[String],
+) -> anyhow::Result<()> {
+    let recursion_depth = std::env::var("__YA_RECURSION_DEPTH").unwrap_or("0".to_string()).parse::<u64>().unwrap_or(0);
+    if (recursion_depth) >= DEFAULT_RECURSION_LIMIT {
+        return Err(anyhow::anyhow!(
+            "Recursion limit reached: {}",
+            DEFAULT_RECURSION_LIMIT
+        ));
     }
 
-    if run_command_flags.execution {
-        full_command.print_execution(extra_args);
-    }
-
-    let mut final_args = args.clone().to_vec();
-
-    if let Some(cmd) = cmd {
-        final_args.push(cmd);
-    }
-
-    final_args.extend_from_slice(extra_args);
-
-    let mut command_builder = Command::new(prog);
-
-    command_builder.args(final_args);
-
-    if let Some(chdir) = chdir {
-        let chdir = resolve_chdir(chdir)?;
-        command_builder.current_dir(chdir);
-    }
-
-    let result = command_builder.spawn()?.wait()?;
-
-    if !result.success() {
-        std::process::exit(result.code().unwrap_or(1));
-    }
-
-    if !run_command_flags.quiet {
-        if let Some(msg) = post_msg {
-            println!("{}", msg);
-        }
-    }
-
-    if let Some(post_cmds) = post_cmds {
-        for cmd in post_cmds {
-            run_command_from_config(config, &cmd, run_command_flags, &[], recursion_depth + 1)?;
-        }
-    }
-
-    Ok(())
+    command.run(run_command_flags, extra_args)
 }

@@ -28,11 +28,10 @@ fn main() -> anyhow::Result<()> {
             &config,
             command_name.as_str(),
             &RunCommandFlags {
-                quiet: args.quiet,
                 execution: args.execution,
+                quiet: args.quiet,
             },
             args.extra_args.as_slice(),
-            0,
         )?
     }
 

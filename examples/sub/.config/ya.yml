@@ -1,0 +1,21 @@
+run:
+  sub:
+    first: echo 'First'
+    second: echo 'Second'
+    third: echo 'Third'
+
+    the:
+      sub:
+        first: echo 'The First'
+        second: echo 'The Second'
+        third: echo 'The Third'
+
+    with:
+      sub:
+        python:
+          prog: python3
+          args: [-c]
+          cmd: |
+            fruits = ["apple", "banana", "watermelon"]
+            for x in fruits:
+              print(f"{x} is a fruit with {len(x)} characters!")
