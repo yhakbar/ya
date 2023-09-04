@@ -10,11 +10,11 @@ ensure_rg: |
 
 release_patch:
   chdir: $GIT_ROOT
-  pre_cmds:
-    - ensure_sd
-    - ensure_rg
   cmd: |
     set -euo pipefail
+
+    ya -c .config/ya/tag.yml ensure_sd
+    ya -c .config/ya/tag.yml ensure_rg
 
     version=$(cargo pkgid | sd '^.*#([^ ]+)$' '$1')
     major=$(echo "$version" | sd '^([0-9]+)\.[0-9]+\.[0-9]+$' '$1')
@@ -32,11 +32,11 @@ release_patch:
 
 release_minor:
   chdir: $GIT_ROOT
-  pre_cmds:
-    - ensure_sd
-    - ensure_rg
   cmd: |
     set -euo pipefail
+
+    ya -c .config/ya/tag.yml ensure_sd
+    ya -c .config/ya/tag.yml ensure_rg
 
     version=$(cargo pkgid | sd '^.*#([^ ]+)$' '$1')
     major=$(echo "$version" | sd '^([0-9]+)\.[0-9]+\.[0-9]+$' '$1')
@@ -54,11 +54,11 @@ release_minor:
 
 release_major:
   chdir: $GIT_ROOT
-  pre_cmds:
-    - ensure_sd
-    - ensure_rg
   cmd: |
     set -euo pipefail
+
+    ya -c .config/ya/tag.yml ensure_sd
+    ya -c .config/ya/tag.yml ensure_rg
 
     version=$(cargo pkgid | sd '^.*#([^ ]+)$' '$1')
     major=$(echo "$version" | sd '^([0-9]+)\.[0-9]+\.[0-9]+$' '$1')
