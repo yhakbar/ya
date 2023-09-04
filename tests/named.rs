@@ -6,7 +6,9 @@ mod named {
         Command::cargo_bin(env!("CARGO_PKG_NAME")).expect("Error invoking ya")
     }
 
+    /// This test is ignored by default because it requires an installed `ya` binary to be accessible in PATH.
     #[test]
+    #[ignore]
     fn named() -> Result<()> {
         ya().args([ "-c", ".config/ya/named.yml", "run"])
             .current_dir("examples/named")
