@@ -12,7 +12,7 @@ build = "build.rs"
 clap = { version = "4.4.4", features = ["derive", "cargo"], optional = true }
 clap_complete = { version = "4.4.1", optional = true }
 handlebars = { version = "4.3.7", optional = true }
-serde_json = { version = "1.0.106", optional = true }
+serde_json = { version = "1.0.107", optional = true }
 
 [dependencies]
 anyhow = "1.0.75"
@@ -22,7 +22,7 @@ serde_yaml = "0.9.25"
 home = { version = "0.5.5", optional = true }
 clap_complete = { version = "4.4.1", optional = true }
 handlebars = {version = "4.3.7", features = ["dir_source"], optional = true }
-serde_json = { version = "1.0.106", optional = true }
+serde_json = { version = "1.0.107", optional = true }
 ignore = { version = "0.4.20", optional = true }
 dialoguer = { version = "0.10.4", optional = true }
 
