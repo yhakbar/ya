@@ -256,3 +256,15 @@ release:
 ```
 
 Note that subcommands can be defined as any valid command that `ya` supports, including other subcommands.
+
+### Environment Variables
+
+If you'd like to explicitly list the environment variables that should be passed to a command, you can do so using the `env` key. For example, you might want to pass the `RUST_LOG` environment variable to a command. You can do that like so:
+
+```yml
+debug:
+  prog: cargo
+  args: ["run"]
+  env:
+    RUST_LOG: debug
+```

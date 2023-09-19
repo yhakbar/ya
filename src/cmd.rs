@@ -98,6 +98,7 @@ impl Runnable for FullCommand {
         let prog = &self.prog.clone();
         let cmd = &self.cmd;
         let chdir = &self.chdir;
+        let envs = &self.envs;
 
         let mut command = Command::new(prog);
 
@@ -114,6 +115,12 @@ impl Runnable for FullCommand {
         if let Some(chdir) = chdir {
             let chdir = resolve_chdir(chdir.to_string())?;
             command.current_dir(chdir);
+        }
+
+        if let Some(envs) = envs {
+            for (key, value) in envs {
+                command.env(key, value);
+            }
         }
 
         let result = command.spawn()?.wait()?;

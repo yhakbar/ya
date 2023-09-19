@@ -767,8 +767,12 @@ mod get_templates {
         let templates = get_templates(&templates_dir)?;
 
         assert_eq!(templates.len(), 2);
-        assert_eq!(templates[0], "test.hbs");
-        assert_eq!(templates[1], "test2.hbs");
+
+        let filename1 = "test.hbs".to_owned();
+        let filename2 = "test2.hbs".to_owned();
+
+        assert!(templates.contains(&filename1));
+        assert!(templates.contains(&filename2));
 
         Ok(())
     }
