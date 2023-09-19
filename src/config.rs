@@ -89,6 +89,7 @@ pub struct FullCommand {
     pub args: Vec<String>,
     pub cmd: Option<String>,
     pub chdir: Option<String>,
+    pub envs: Option<HashMap<String, String>>,
 }
 
 impl Validatable for FullCommand {
@@ -96,7 +97,7 @@ impl Validatable for FullCommand {
         if ! run_command_flags.quiet {
             let keys = m.keys().filter(|k| {
                 let k = k.as_str().unwrap_or("");
-                k != "prog" && k != "args" && k != "cmd" && k != "chdir"
+                k != "prog" && k != "args" && k != "cmd" && k != "chdir" && k != "env"
             }).collect::<Vec<_>>();
 
             if ! keys.is_empty() {
@@ -157,12 +158,36 @@ impl TryFrom<serde_yaml::Mapping> for FullCommand {
             })
             .transpose()?;
 
+        let envs = m.get("env")
+            .map(|v| {
+                v.as_mapping()
+                    .ok_or(anyhow::anyhow!("Invalid FullCommand: `env` is not a mapping"))
+            })
+            .transpose()?
+            .map(|m| {
+                m.iter()
+                    .map(|(k, v)| {
+                        let k = k.as_str()
+                            .ok_or(anyhow::anyhow!("Invalid FullCommand: `env` key is not a string"))?
+                            .to_string();
+
+                        let v = v.as_str()
+                            .ok_or(anyhow::anyhow!("Invalid FullCommand: `env` value is not a string"))?
+                            .to_string();
+
+                        Ok((k, v))
+                    })
+                    .collect::<anyhow::Result<HashMap<String, String>>>()
+            })
+            .transpose()?;
+
 
         Ok(FullCommand {
             prog,
             args,
             cmd,
             chdir: chdir.map(|s| s.to_string()),
+            envs,
         })
     }
 }

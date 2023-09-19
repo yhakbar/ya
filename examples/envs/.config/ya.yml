@@ -1,0 +1,5 @@
+envs:
+  cmd: |
+    echo "$CUSTOM_ENV"
+  env:
+    CUSTOM_ENV: "custom value"
