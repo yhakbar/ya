@@ -24,7 +24,7 @@ clap_complete = { version = "4.4.3", optional = true }
 handlebars = {version = "4.3.7", features = ["dir_source"], optional = true }
 serde_json = { version = "1.0.107", optional = true }
 ignore = { version = "0.4.20", optional = true }
-dialoguer = { version = "0.10.4", optional = true }
+dialoguer = { version = "0.11.0", optional = true }
 
 [dev-dependencies]
 assert_cmd = "2.0.12"
