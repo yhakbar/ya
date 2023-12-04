@@ -29,8 +29,11 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Install
-        run: cargo install --features yadayada --path .
+      - name: Install yadayada if not cached
+        run: |
+          if ! command -v yadayada > /dev/null; then
+            cargo install --features yadayada --path .
+          fi
 
       - name: Run docs stamp
         run: ya -c .config/ya/docs.yml stamp
