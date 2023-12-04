@@ -17,7 +17,7 @@ mod template {
         std::fs::create_dir(&templates_dir)?;
 
         let template_path = templates_dir.join("basic");
-        std::fs::create_dir(&template_path)?;
+        std::fs::create_dir(template_path)?;
 
         for command in ["template", "t"] {
             yadayada().args([command, "ls"])
