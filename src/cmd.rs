@@ -15,7 +15,6 @@ pub fn run_command_from_config(
     run_command_flags: &RunCommandFlags,
     extra_args: &[String],
 ) -> anyhow::Result<()> {
-    let command_name = command_name;
     let cmd = config.get(command_name).ok_or(anyhow::anyhow!(
         "Command {} not found in config",
         command_name
