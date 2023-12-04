@@ -36,7 +36,7 @@ pub fn build_bash_completion(
     bin_name: &str,
 ) -> Result<(), Error> {
     if let Some(outdir) = temp_dir().to_str() {
-        let path = generate_to(Bash, cmd, bin_name, outdir.clone())?;
+        let path = generate_to(Bash, cmd, bin_name, outdir)?;
         template_completion(path, release_dir, None)?
     }
     Ok(())
@@ -49,7 +49,7 @@ pub fn build_elvish_completion(
     bin_name: &str,
 ) -> Result<(), Error> {
     if let Some(outdir) = temp_dir().to_str() {
-        let path = generate_to(Elvish, cmd, bin_name, outdir.clone())?;
+        let path = generate_to(Elvish, cmd, bin_name, outdir)?;
         template_completion(path, release_dir, None)?
     }
     Ok(())
@@ -62,7 +62,7 @@ pub fn build_zsh_completion(
     bin_name: &str,
 ) -> Result<(), Error> {
     if let Some(outdir) = temp_dir().to_str() {
-        let path = generate_to(Zsh, cmd, bin_name, outdir.clone())?;
+        let path = generate_to(Zsh, cmd, bin_name, outdir)?;
         template_completion(path, release_dir, None)?
     }
     Ok(())
@@ -75,7 +75,7 @@ pub fn build_powershell_completion(
     bin_name: &str,
 ) -> Result<(), Error> {
     if let Some(outdir) = temp_dir().to_str() {
-        let path = generate_to(PowerShell, cmd, bin_name, outdir.clone())?;
+        let path = generate_to(PowerShell, cmd, bin_name, outdir)?;
         template_completion(path, release_dir, None)?
     }
     Ok(())
