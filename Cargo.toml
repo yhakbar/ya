@@ -17,7 +17,7 @@ serde_json = { version = "1.0.107", optional = true }
 [dependencies]
 anyhow = "1.0.75"
 clap = { version = "4.4.11", features = ["derive", "cargo"] }
-colored = "2.0.4"
+colored = "2.1.0"
 serde_yaml = "0.9.27"
 home = { version = "0.5.5", optional = true }
 clap_complete = { version = "4.4.4", optional = true }
