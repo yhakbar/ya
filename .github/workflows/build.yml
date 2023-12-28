@@ -98,7 +98,7 @@ jobs:
       - name: Upload Completions
         uses: actions/upload-artifact@v4
         with:
-          name: completions
+          name: completions-${{ matrix.target }}
           path: |
             completions/release/*
             !completions/release/.gitignore
