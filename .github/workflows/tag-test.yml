@@ -30,6 +30,7 @@ jobs:
         env:
          DOWNLOAD_PATH: ${{ steps.download.outputs.download-path }}
         run: |
+            ls -R
             ls -l "$DOWNLOAD_PATH"
 
   release_attempt_in_v4:
@@ -51,4 +52,5 @@ jobs:
         env:
          DOWNLOAD_PATH: ${{ steps.download.outputs.download-path }}
         run: |
+            ls -R
             ls -l "$DOWNLOAD_PATH"
