@@ -96,9 +96,11 @@ jobs:
           path: yadayada-${{ matrix.target }}.tar.gz
 
       - name: Upload Completions
+        # Only upload completions for the `x86_64-unknown-linux-gnu` target, as they're all the same
+        if: ${{ matrix.target == 'x86_64-unknown-linux-gnu' }}
         uses: actions/upload-artifact@v4
         with:
-          name: completions-${{ matrix.target }}
+          name: completions
           path: |
             completions/release/*
             !completions/release/.gitignore
