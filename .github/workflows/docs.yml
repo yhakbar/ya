@@ -36,7 +36,9 @@ jobs:
           fi
 
       - name: Run docs stamp
-        run: ya -c .config/ya/docs.yml stamp
+        run: |
+          rtx reshim
+          ya -c .config/ya/docs.yml stamp
 
       - name: "Docs check"
         run: |
