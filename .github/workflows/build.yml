@@ -84,19 +84,19 @@ jobs:
           tar -czf yadayada-${{ matrix.target }}.tar.gz yadayada
 
       - name: Upload `ya` tarball
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ya-${{ matrix.target }}
           path: ya-${{ matrix.target }}.tar.gz
 
       - name: Upload `yadayada` tarball
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: yadayada-${{ matrix.target }}
           path: yadayada-${{ matrix.target }}.tar.gz
 
       - name: Upload Completions
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: completions
           path: |
