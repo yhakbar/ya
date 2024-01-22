@@ -11,7 +11,7 @@ build = "build.rs"
 [build-dependencies]
 clap = { version = "4.4.11", features = ["derive", "cargo"], optional = true }
 clap_complete = { version = "4.4.4", optional = true }
-handlebars = { version = "4.3.7", optional = true }
+handlebars = { version = "5.1.1", optional = true }
 serde_json = { version = "1.0.107", optional = true }
 
 [dependencies]
@@ -21,7 +21,7 @@ colored = "2.1.0"
 serde_yaml = "0.9.29"
 home = { version = "0.5.9", optional = true }
 clap_complete = { version = "4.4.4", optional = true }
-handlebars = {version = "4.3.7", features = ["dir_source"], optional = true }
+handlebars = {version = "5.1.1", features = ["dir_source"], optional = true }
 serde_json = { version = "1.0.107", optional = true }
 ignore = { version = "0.4.20", optional = true }
 dialoguer = { version = "0.11.0", optional = true }
