@@ -21,13 +21,12 @@ jobs:
         with:
           path: assets
 
+
       - name: Install fd
-        uses: jaxxstorm/action-install-gh-release@v1
-        with:
-          repo: sharkdp/fd
-          tag: v9.0.0
-          platform: linux
-          arch: x86_64
+        run: |
+            apt update
+            apt install fd-find
+            ln -s $(which fdfind) /usr/local/bin/fd
 
       - name: Prep Assets
         run: |
