@@ -21,6 +21,19 @@ jobs:
         with:
           path: assets
 
-      - name: Create Release
+      - name: Install fd
+        uses: jaxxstorm/action-install-gh-release@v1
+        with:
+          repo: sharkdp/fd
+          tag: v9.0.0
+          platform: linux
+          arch: x86_64
+
+      - name: Prep Assets
+        run: |
+            fd -tf --min-depth 2 . assets -x mv '{}' assets/
+            fd -td assets -x rmdir '{}'
+
+      - name: Check Assets
         run: |
             ls -R
