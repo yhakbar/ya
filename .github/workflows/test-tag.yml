@@ -30,7 +30,7 @@ jobs:
       - name: Prep Assets
         run: |
             fd -tf --min-depth 2 . assets -x mv '{}' assets/
-            fd -td assets -x rmdir '{}'
+            fd -td --min-depth 2 . assets -x rmdir '{}'
 
       - name: Check Assets
         run: |
