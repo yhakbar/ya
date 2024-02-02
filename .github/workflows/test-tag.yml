@@ -23,8 +23,8 @@ jobs:
 
       - name: Install fd
         run: |
-            apt update
-            apt install fd-find
+            sudo apt update
+            sudo apt install fd-find
             ln -s $(which fdfind) /usr/local/bin/fd
 
       - name: Prep Assets
