@@ -135,7 +135,7 @@ impl Runnable for FullCommand {
 impl Runnable for SubCommands {
     fn run(&self, run_command_flags: &RunCommandFlags, extra_args: &[String]) -> Result<(), anyhow::Error> {
         let subcommand_name = extra_args
-            .get(0)
+            .first()
             .ok_or(anyhow::anyhow!("No subcommand provided"))?;
         let SubCommands(subcommands) = self;
         let subcommand = subcommands
