@@ -31,11 +31,11 @@ jobs:
 
       - name: Prep Assets
         run: |
-            fd -tf . assets -x mv '{}' assets/
             cd assets
+            fd -tf -x mv '{}' ./
             fd -td -x rmdir '{}'
 
       - name: Create Release
-        run: gh release create --generate-notes ${GITHUB_REF#refs/tags/} assets/***/*
+        run: gh release create --generate-notes ${GITHUB_REF#refs/tags/} assets/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
