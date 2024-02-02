@@ -67,7 +67,7 @@ jobs:
         if: matrix.use-cross
         run: |
           cargo install cross --locked
-          rtx reshim rust
+          mise reshim rust
 
       - name: Cross Build
         if: matrix.use-cross
