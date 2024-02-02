@@ -42,7 +42,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - uses: jdxcode/rtx-action@v1
+      - uses: jdx/mise-action@v1
 
       - name: Cache Cargo
         uses: actions/cache@v4
