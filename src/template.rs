@@ -274,7 +274,11 @@ fn stamp_template_to_target(
     parameters: &[Parameter],
 ) -> Result<(), anyhow::Error> {
     let mut hbs = Handlebars::new();
-    hbs.register_templates_directory(".hbs", template_path)?;
+    let opts = handlebars::DirectorySourceOptions {
+        tpl_extension: ".hbs".to_string(),
+        ..Default::default()
+    };
+    hbs.register_templates_directory(template_path, opts)?;
     hbs.register_escape_fn(handlebars::no_escape);
 
     let yadayada_config_path = template_path.join(".config").join("yadayada.yml");
