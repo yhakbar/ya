@@ -15,7 +15,7 @@ handlebars = { version = "5.1.0", optional = true }
 serde_json = { version = "1.0.113", optional = true }
 
 [dependencies]
-anyhow = "1.0.79"
+anyhow = "1.0.80"
 clap = { version = "4.5.0", features = ["derive", "cargo"] }
 colored = "2.1.0"
 serde_yaml = "0.9.29"
