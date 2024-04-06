@@ -326,7 +326,7 @@ fn stamp_template_to_target(
             }
         }
 
-        let mut file = OpenOptions::new().write(true).create(true).open(&target_file_path)?;
+        let mut file = OpenOptions::new().write(true).create(true).truncate(true).open(&target_file_path)?;
         file.write_all(content.as_bytes())?;
     }
 
