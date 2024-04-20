@@ -49,5 +49,6 @@ jobs:
           if [[ -n $(git status --porcelain) ]]; then
             echo "Documentation is out of date. Please run 'ya -c .config/ya/docs.yml stamp' and commit the changes."
             git status
+            git diff
             exit 1
           fi
