@@ -9,14 +9,14 @@ default-run = "ya"
 build = "build.rs"
 
 [build-dependencies]
-clap = { version = "4.5.9", features = ["derive", "cargo"], optional = true }
+clap = { version = "4.5.11", features = ["derive", "cargo"], optional = true }
 clap_complete = { version = "4.5.8", optional = true }
 handlebars = { version = "5.1.2", optional = true }
 serde_json = { version = "1.0.120", optional = true }
 
 [dependencies]
 anyhow = "1.0.86"
-clap = { version = "4.5.9", features = ["derive", "cargo"] }
+clap = { version = "4.5.11", features = ["derive", "cargo"] }
 colored = "2.1.0"
 serde_yaml = "0.9.34"
 home = { version = "0.5.9", optional = true }
