@@ -36,7 +36,7 @@ mod alias {
             )?;
 
             let echo_test_value = file_value
-                .get(&serde_yaml::Value::String("echo-test".to_string()))
+                .get(serde_yaml::Value::String("echo-test".to_string()))
                 .expect("Error getting echo-test value");
 
             println!("{}", std::fs::read_to_string(&tmp_ya_yml).expect("Error reading ya.yml"));
